@@ -113,7 +113,7 @@ Every query may spend at most two targeted extraction calls, and the learned pol
 - **Policy:** for the question's type, pick the relation types with the highest `blame_count` that have no `EXTRACTED` edge from the seed entity's chunks.
 - **Cost unit:** one extraction call on one chunk for one relation type. Cost per call is roughly constant, so ranking by blame is enough. No improvement-per-cost estimate.
 - **Why per query, not per iteration:** a global budget of 20 chunks per iteration covers about 100 of 1,748 chunks over five iterations. Held-out chunks would almost never be chosen and the curve would stay flat.
-- **Control:** the same budget spent on randomly chosen relation types. Learned against random at equal cost is the comparison that shows the learning matters.
+- **Control:** the same budget spent on randomly chosen relation types. Learned against random at equal cost is the comparison that shows the learning matters. The random policy runs on held-out only (5 iterations of 87 questions), so it never sees the feedback questions.
 
 ## Evaluation
 
@@ -122,12 +122,12 @@ The headline chart is held-out accuracy over five iterations for the learned pol
 | Line | What it is | What it proves |
 | --- | --- | --- |
 | Learned policy | Full loop: schema growth, reweighting, budgeted extraction | The system improves with use |
-| Random policy | Same per-query budget, relation types chosen at random | The gain comes from learning, not from extra extraction |
+| Random policy | Same per-query budget, relation types chosen at random. Runs on held-out only, never on the feedback questions | The gain comes from learning, not from extra extraction |
 | Static graph | The iteration-0 shallow graph, never changed | The floor |
-| Vector only | Top-k chunk retrieval, no graph | Whether the task needs the graph |
+| BM25 | Top-5 chunk retrieval by BM25, no graph | Whether the task needs the graph |
 
 - **Metrics:** exact match and F1 on the entity-disjoint held-out set, plus a breakdown by question type and hop count.
-- **Noise:** 87 held-out questions gives a noisy curve. Run three seeds and show the band.
+- **Noise:** 87 held-out questions gives a noisy curve. Every score carries a bootstrap 95% confidence interval (1,000 resamples, seed 42), computed in `summary.json`. This replaces running extra seeds.
 - **Ablations:** ingestion only, reweighting only, both.
 - **Cost:** cumulative extraction calls per iteration, reported next to accuracy.
 - **Load test:** 50 concurrent queries while a repair batch is writing. Report p50 and p95 latency.
@@ -155,16 +155,16 @@ The iteration-0 number must exist by hour 9. Everything after that is the loop.
 | --- | --- | --- |
 | 0–2 | HydraDB in Docker. Test `MERGE`, `SET` on relationship properties, `UNWIND`, `ORDER BY` with `LIMIT`. Sample the data | Smoke-test script passes |
 | 2–6 | Shallow ingest (chunks, entities, literals, a small seed schema) and the query pipeline | A question returns an answer with its path |
-| 6–9 | Eval harness, entity-disjoint split, vector-only and static-graph baselines | Iteration-0 numbers saved to JSON. Due 15 Nov 12:00 IST |
+| 6–9 | Eval harness, entity-disjoint split, BM25 and static-graph baselines | Iteration-0 numbers saved to JSON. Due 15 Nov 12:00 IST |
 | 9–14 | Evidence-coverage classifier, schema growth, budgeted targeted extraction | Failures are labelled and repairs write `Mutation` nodes |
 | 14–18 | Reweighting and the random-policy control. Run five iterations | The curve exists |
-| 18–21 | Ablations, three seeds, load test | Numbers for the README |
+| 18–21 | Ablations, bootstrap CIs, load test | Numbers for the README |
 | 21–25 | Streamlit demo: curve, path viewer, mutation log | A two-minute walkthrough works |
 | 25–28 | Pitch, README, demo video | Submission draft complete |
 | 28–30 | Buffer and submit. The buffer ends 16 Nov 07:00 IST | Submitted |
 
 - **Cache every LLM call** on disk by prompt hash, so reruns are free and reproducible.
-- **Cut order if behind:** alias repair, then the second demo corpus, then extra seeds, then UI polish.
+- **Cut order if behind:** alias repair, then the second demo corpus, then UI polish.
 - **Never cut:** the held-out curve and the random-policy control.
 
 ## Go-to-market pitch
@@ -192,15 +192,15 @@ The smoke test (`scripts/smoke_test.py`) against HydraDB v0.4.0 found four const
 
 ## Risks and first-hour checks
 
-The largest risk is that vector-only retrieval beats the graph overall, because flat RAG is strong on these benchmarks.
+The largest risk is that the BM25 baseline beats the graph overall, because flat RAG is strong on these benchmarks.
 
 | Risk | Mitigation |
 | --- | --- |
-| Vector baseline wins overall | Lead with the breakdown by question type and hop count, and with learned against random. Report the overall result plainly |
+| BM25 baseline wins overall | Lead with the breakdown by question type and hop count, and with learned against random. Report the overall result plainly |
 | HydraDB lacks a Cypher feature we assumed | Checked by `scripts/smoke_test.py` on 0.4.0. Constraints are listed in Smoke test findings. Re-run the smoke test if the image changes |
 | Dataset format differs from what we assumed | Confirm evidence triples and question-type labels before writing the classifier |
 | Curve is flat | Check that the budget is per query and that iteration 0 is shallow enough to leave room |
-| Curve is noisy | Three seeds, show the band |
+| Curve is noisy | Bootstrap 95% CIs on the held-out set |
 | Label leakage | Gold data is read only for feedback questions. One code path loads labels, and the held-out loader does not call it |
 | LLM cost or rate limits | Disk cache by prompt hash. Use a small, fast model for extraction |
 

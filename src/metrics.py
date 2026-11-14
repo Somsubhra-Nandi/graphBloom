@@ -3,6 +3,7 @@
 normalize_answer: lowercase, drop punctuation, drop articles (a, an, the), collapse whitespace.
 F1 is token overlap; if either side is yes / no / noanswer and the two differ, F1 is 0.
 """
+import random
 import re
 import string
 from collections import Counter
@@ -31,3 +32,13 @@ def f1_score(pred, gold):
         return 0.0
     prec, rec = same / len(pt), same / len(gt)
     return 2 * prec * rec / (prec + rec)
+
+
+def bootstrap_ci(values, resamples=1000, seed=42, alpha=0.05):
+    """95% percentile bootstrap confidence interval for the mean of `values`."""
+    n = len(values)
+    if n == 0:
+        return None
+    rng = random.Random(seed)
+    means = sorted(sum(values[rng.randrange(n)] for _ in range(n)) / n for _ in range(resamples))
+    return [round(means[int(alpha / 2 * resamples)], 4), round(means[int((1 - alpha / 2) * resamples) - 1], 4)]

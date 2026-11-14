@@ -1,0 +1,127 @@
+{
+ "run_name": "iter0_bm25",
+ "system": "bm25",
+ "splits": {
+  "heldout": {
+   "overall": {
+    "n": 87,
+    "em": 0.2299,
+    "em_ci95": [
+     0.1494,
+     0.3218
+    ],
+    "f1": 0.3031,
+    "f1_ci95": [
+     0.2126,
+     0.4035
+    ]
+   },
+   "by_type": {
+    "bridge_comparison": {
+     "n": 16,
+     "em": 0.0,
+     "em_ci95": [
+      0.0,
+      0.0
+     ],
+     "f1": 0.0119,
+     "f1_ci95": [
+      0.0,
+      0.0357
+     ]
+    },
+    "comparison": {
+     "n": 21,
+     "em": 0.8095,
+     "em_ci95": [
+      0.619,
+      0.9524
+     ],
+     "f1": 0.9566,
+     "f1_ci95": [
+      0.9048,
+      0.9905
+     ]
+    },
+    "compositional": {
+     "n": 38,
+     "em": 0.0526,
+     "em_ci95": [
+      0.0,
+      0.1316
+     ],
+     "f1": 0.0983,
+     "f1_ci95": [
+      0.0263,
+      0.1967
+     ]
+    },
+    "inference": {
+     "n": 12,
+     "em": 0.0833,
+     "em_ci95": [
+      0.0,
+      0.25
+     ],
+     "f1": 0.1958,
+     "f1_ci95": [
+      0.0083,
+      0.4167
+     ]
+    }
+   },
+   "by_hops": {
+    "1": {
+     "n": 21,
+     "em": 0.8095,
+     "em_ci95": [
+      0.619,
+      0.9524
+     ],
+     "f1": 0.9566,
+     "f1_ci95": [
+      0.9048,
+      0.9905
+     ]
+    },
+    "2": {
+     "n": 66,
+     "em": 0.0455,
+     "em_ci95": [
+      0.0,
+      0.1061
+     ],
+     "f1": 0.0951,
+     "f1_ci95": [
+      0.0376,
+      0.1652
+     ]
+    }
+   },
+   "complete": true,
+   "questions": "87/87",
+   "cost_usd": 0.172283,
+   "llm_calls": 87,
+   "tokens_this_invocation": {
+    "input": 127183,
+    "output": 9020
+   }
+  }
+ },
+ "run_params": {
+  "beam_k": 5,
+  "max_hops": 3,
+  "fetch_limit": 200,
+  "chain_boost": 3.0,
+  "answer_max_chunks": 5,
+  "answer_max_tokens": 200,
+  "answer_reasoning": "one sentence before the answer",
+  "dates_in_prompt": "raw text plus ISO form",
+  "dead_end_rule": "planned-chain branches only; leaves and literal steps excluded",
+  "performer_rule": "performer edges dropped when the subject also has a director edge",
+  "min_confidence": 0.6,
+  "extract_model": "claude-haiku-4-5-20251001",
+  "answer_model": "claude-haiku-4-5-20251001",
+  "answer_prompt_sha": "f060db2249b0"
+ }
+}

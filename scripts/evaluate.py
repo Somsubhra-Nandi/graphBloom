@@ -1,9 +1,9 @@
 """Run a system over a question file; write results/<run_name>/<split>.jsonl and summary.json.
 
   .venv/bin/python scripts/evaluate.py --system static_graph --split heldout --run-name iter0_static_graph
-  .venv/bin/python scripts/evaluate.py --system vector_only  --split feedback --run-name iter0_vector_only
+  .venv/bin/python scripts/evaluate.py --system bm25  --split feedback --run-name iter0_bm25
 
-Systems: static_graph (the iteration-0 shallow graph, never changed) and vector_only (BM25 top-5 chunks, no graph).
+Systems: static_graph (the iteration-0 shallow graph, never changed) and bm25 (BM25 top-5 chunks, no graph; named bm25).
 Both use the same answer prompt and model. Everything runs in the smoke phase. Resumable: question ids already in
 the results file are skipped, and a BudgetExceeded stops the run cleanly with the rows written so far.
 
@@ -21,7 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src import config, llm  # noqa: E402
-from src.metrics import exact_match, f1_score  # noqa: E402
+from src.metrics import bootstrap_ci, exact_match, f1_score  # noqa: E402
 
 # Hops along the entity chain, taken from the question type so that no gold evidence is needed (held-out files
 # carry none): comparison looks up one attribute per entity; the others take a relation step first.
@@ -35,9 +35,9 @@ def make_system(name):
 
         eng = QueryEngine(phase=PHASE)
         return lambda q: eng.answer(q)
-    if name == "vector_only":
+    if name == "bm25":
         from src.query import answer_from_prompt, build_answer_prompt
-        from src.vector import BM25Retriever
+        from src.bm25 import BM25Retriever
 
         ret = BM25Retriever()
 
@@ -52,7 +52,10 @@ def make_system(name):
 
 def agg(rows):
     n = len(rows)
-    return {"n": n, "em": round(sum(r["em"] for r in rows) / n, 4), "f1": round(sum(r["f1"] for r in rows) / n, 4)} if n else {"n": 0}
+    if not n:
+        return {"n": 0}
+    ems, f1s = [r["em"] for r in rows], [r["f1"] for r in rows]
+    return {"n": n, "em": round(sum(ems) / n, 4), "em_ci95": bootstrap_ci(ems), "f1": round(sum(f1s) / n, 4), "f1_ci95": bootstrap_ci(f1s)}  # 1,000 resamples, seed 42
 
 
 def summarize(rows):
@@ -65,7 +68,7 @@ def summarize(rows):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--system", required=True, choices=["static_graph", "vector_only"])
+    ap.add_argument("--system", required=True, choices=["static_graph", "bm25"])
     ap.add_argument("--split", required=True, choices=["feedback", "heldout"])
     ap.add_argument("--run-name", required=True)
     ap.add_argument("--limit", type=int)
@@ -130,9 +133,10 @@ def main():
     }
     sp.write_text(json.dumps(summary, indent=1))
     s = summary["splits"][args.split]
-    print(f"\n{args.run_name} / {args.split}: {s['questions']} questions  EM {s['overall'].get('em')}  F1 {s['overall'].get('f1')}  cost ${s['cost_usd']:.4f}")
+    o = s["overall"]
+    print(f"\n{args.run_name} / {args.split}: {s['questions']} questions  EM {o.get('em')} {o.get('em_ci95')}  F1 {o.get('f1')} {o.get('f1_ci95')}  cost ${s['cost_usd']:.4f}")
     for k, v in s["by_type"].items():
-        print(f"   {k:20s} n={v['n']:3d} EM {v['em']:.3f} F1 {v['f1']:.3f}")
+        print(f"   {k:20s} n={v['n']:3d} EM {v['em']:.3f} {v['em_ci95']}  F1 {v['f1']:.3f} {v['f1_ci95']}")
     if err:
         print("STOPPED:", err)
         sys.exit(2)

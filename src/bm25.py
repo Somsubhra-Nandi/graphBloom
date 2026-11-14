@@ -1,8 +1,7 @@
-"""Vector-only baseline retriever: top-k chunks for a question, no graph.
+"""BM25 baseline retriever: top-k chunks for a question, no graph.
 
-sentence-transformers could not be installed (PyPI unreachable: DNS failure), and neither could rank_bm25,
-so this is a small in-repo Okapi BM25 over title + text. It costs nothing and needs no network. The retriever
-interface (`top_k(question, k)`) is what a sentence-transformers retriever would also expose.
+A small in-repo Okapi BM25 over title + text (rank_bm25 was not installable when this was written). It costs
+nothing and needs no network. Results and charts call this system `bm25`.
 """
 import json
 import math

@@ -48,7 +48,7 @@ def plan_prompt(question):
 
 
 def build_answer_prompt(question, path_lines, attr_lines, chunks):
-    """Shared by every system (static graph, vector only, and later runs) so answers are comparable."""
+    """Shared by every system (static graph, bm25, and later runs) so answers are comparable."""
     return (
         f"Question: {question}\n\nGraph paths:\n" + ("\n".join(path_lines) or "(none)")
         + "\n\nEntity attributes:\n" + ("\n".join(attr_lines) or "(none)")
