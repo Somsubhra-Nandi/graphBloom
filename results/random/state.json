@@ -1,0 +1,118 @@
+{
+ "policy": "random",
+ "seed": 42,
+ "next_iteration": 6,
+ "growth_applied": 5,
+ "added": {
+  "1": [
+   "mother",
+   "award received"
+  ],
+  "2": [
+   "sibling",
+   "inception"
+  ],
+  "3": [
+   "spouse",
+   "country"
+  ],
+  "4": [
+   "employer",
+   "date of death"
+  ],
+  "5": [
+   "publisher",
+   "educated at"
+  ]
+ },
+ "iterations": {
+  "0": {
+   "heldout_em": 0.4713,
+   "heldout_f1": 0.5965,
+   "cost_usd": 0.0
+  },
+  "1": {
+   "heldout_em": 0.4828,
+   "heldout_f1": 0.6014,
+   "cost_usd": 0.0
+  },
+  "2": {
+   "heldout_em": 0.4828,
+   "heldout_f1": 0.6014,
+   "cost_usd": 0.06544
+  },
+  "3": {
+   "heldout_em": 0.4943,
+   "heldout_f1": 0.6216,
+   "cost_usd": 0.12813
+  },
+  "4": {
+   "heldout_em": 0.5172,
+   "heldout_f1": 0.6523,
+   "cost_usd": 0.12863
+  },
+  "5": {
+   "heldout_em": 0.5172,
+   "heldout_f1": 0.658,
+   "cost_usd": 0.13176
+  }
+ },
+ "pool": {
+  "father": {
+   "count": 37,
+   "literal": false
+  },
+  "date of death": {
+   "count": 30,
+   "literal": true
+  },
+  "place of death": {
+   "count": 18,
+   "literal": false
+  },
+  "mother": {
+   "count": 14,
+   "literal": false
+  },
+  "spouse": {
+   "count": 12,
+   "literal": false
+  },
+  "country": {
+   "count": 11,
+   "literal": false
+  },
+  "inception": {
+   "count": 5,
+   "literal": true
+  },
+  "award received": {
+   "count": 3,
+   "literal": false
+  },
+  "employer": {
+   "count": 3,
+   "literal": false
+  },
+  "educated at": {
+   "count": 2,
+   "literal": false
+  },
+  "publisher": {
+   "count": 2,
+   "literal": false
+  },
+  "sibling": {
+   "count": 2,
+   "literal": false
+  },
+  "place of burial": {
+   "count": 1,
+   "literal": false
+  },
+  "founded by": {
+   "count": 1,
+   "literal": false
+  }
+ }
+}

@@ -9,7 +9,7 @@ We build a graph search system on HydraDB that starts from a cheap, shallow know
 The demo must prove one claim: on held-out questions about entities the system never received feedback on, a learned policy beats a random policy at the same extraction budget, and the gap widens over five iterations.
 
 - **Track:** 1, the self-improving graph.
-- **Mechanisms:** gap-driven ingestion (schema growth plus targeted extraction) and relation reweighting. Alias addition is a small third.
+- **Mechanism:** gap-driven ingestion (schema growth plus targeted extraction). Relation reweighting and alias repair are future work.
 - **Benchmark:** 2WikiMultihopQA, 250 questions pooled into one corpus of 1,748 paragraphs.
 - **Stack:** Python and FastAPI, HydraDB v0.4.0 over Bolt with the Neo4j Python driver, Streamlit for the demo.
 - **Deadline:** submission is due 16 Nov 2026 at 09:00 IST.
@@ -21,7 +21,7 @@ The system learns at the schema level, not per question, so what it learns trans
 Fully extracting a knowledge graph with an LLM is expensive. We start with a shallow graph and let failures decide where extraction effort goes.
 
 - **What it ingests:** the extraction schema grows. A failure reveals a relation type the shallow pass never extracted, for example `spouse`. The system adds it and extracts it only from chunks about the relevant entity type.
-- **How it queries:** traversal weights are learned per (question type, relation type) and stored on `RelType` nodes, so they apply to unseen questions.
+- **How it queries:** the planner's relation chain, with `CHAIN_BOOST`, steers the beam. The planner's vocabulary is the active schema, so what is learned applies to questions the system has never seen.
 
 Per-edge weights and per-question ingestion only help when the same question is asked again. We avoid both.
 
@@ -46,10 +46,10 @@ The graph holds the knowledge, the learned policy and the history of its own cha
 | `REL` | Edge, Entity to Entity | `type`, `confidence`, `src_chunk`, `created_iter` | One generic edge type, so weights can be applied by its `type` property |
 | `MENTIONS` | Edge, Chunk to Entity | `chunk` | Lets targeted extraction find the chunks for a seed entity |
 | `EXTRACTED` | Edge, Chunk to RelType | `rel_type`, `chunk` | Records which relation types were already extracted from a chunk. Filtered by equality on `rel_type` |
-| `RelType` | Node | `name`, `qtype`, `weight`, `blame_count` | The learned policy, one node per (question type, relation type). Loaded into a Python dict once per iteration and written back at the end of it |
+| `RelType` | Node | `name`, `qtype`, `weight`, `blame_count` | The learned policy, one node per (question type, relation type). `blame_count` is recomputed each iteration as the number of current extraction gaps for that pair; `weight` stays 1.0 (reweighting is future work). Loaded into a Python dict once per iteration and written back at the end of it |
 | `Mutation` | Node | `iter`, `kind`, `reason`, `question_id` | Provenance for every change, and the source of the before/after diff |
 
-Edge score during traversal is `RelType.weight` times `REL.confidence`, computed in Python.
+Edge score during traversal is `RelType.weight` times `REL.confidence`, times `CHAIN_BOOST` when the edge matches the relation the planner expected at that hop, computed in Python. All weights are 1.0 in the current runs.
 
 Every node has a non-negative integer `id` from a persisted counter. Every property is always written with a default value, because `IS NULL` is not available.
 
@@ -92,7 +92,7 @@ Each iteration answers the 150 feedback questions, classifies every failure by h
 | --- | --- | --- |
 | Entity gap | A starting entity cannot be resolved to a node | Add the alias to the existing entity, in the Python dict and in the graph |
 | Extraction gap | A gold evidence triple has no matching edge or attribute in the graph | Raise `blame_count` on RelType(question type, relation). Once the relation is in the active schema, extract it from the gold subject's chunks |
-| Ranking gap | The evidence is in the graph but was not on the retrieved paths | Raise the weight of relation types on the gold chain, decay those on the chosen path |
+| Ranking gap | The evidence is in the graph but was not on the retrieved paths | Label only. Ranking gaps were 0 at iteration 0 and 2 after repair, so the planner chain plus `CHAIN_BOOST` already steers the beam. Reweighting is future work |
 | Reasoning gap | The evidence was retrieved and the answer is still wrong | Log only. No graph change |
 
 Implementation notes:
@@ -110,7 +110,7 @@ The loop then re-scores the held-out set and records one point on the curve. Run
 The thing being learned is the active schema, the set of relations the planner may use and the system extracts. It starts as the 8 seed relations and, for the static run, stays that way. The planner's relation vocabulary is always the active schema.
 
 - **Candidate pool:** the relations in the gold evidence of the 150 feedback questions, minus the active schema. Feedback only, recorded with the run.
-- **Learned policy:** each iteration, add the relations with the highest `blame_count` (summed over question types), at most 2 per iteration, and only those with `blame_count` of at least 2. Each extraction gap adds 1 to the blame of its (question type, relation), creating the `RelType` if it is new.
+- **Learned policy:** each iteration, add the relations with the highest `blame_count` (summed over question types), at most 2 per iteration, and only those with `blame_count` of at least 2. `blame_count` is recomputed every iteration as the number of current extraction gaps for that (question type, relation), creating the `RelType` if it is new.
 - **Random policy:** each iteration, add the same number of relations the learned policy added that iteration, drawn uniformly at random from the candidate pool (seed 42).
 - **Identical across learned, random and static:** the query-time extraction budget, `CHAIN_BOOST`, k, the fetch limit and every prompt. They live in `config.py` and are recorded in each run's output.
 - **Feedback is re-answered only at iterations 0, 2 and 5.** At the other iterations the feedback questions are diagnosed without an answer call (planner and beam, then gold-evidence coverage), and repairs still run. Reasoning gaps are judged only when the question was re-answered.
@@ -134,14 +134,13 @@ The headline chart is held-out accuracy over five iterations for the learned pol
 
 | Line | What it is | What it proves |
 | --- | --- | --- |
-| Learned policy | Full loop: schema growth, reweighting, budgeted extraction | The system improves with use |
+| Learned policy | Full loop: schema growth, repair extraction, budgeted query-time extraction | The system improves with use |
 | Random policy | Same per-query budget; the schema grows by the same number of relations per iteration, drawn at random from the candidate pool. Runs on held-out only, never on the feedback questions | The gain comes from learning, not from extra extraction |
 | Static graph | The iteration-0 shallow graph, never changed | The floor |
 | BM25 | Top-5 chunk retrieval by BM25, no graph | Whether the task needs the graph |
 
 - **Metrics:** exact match and F1 on the entity-disjoint held-out set, plus a breakdown by question type and hop count.
 - **Noise:** 87 held-out questions gives a noisy curve. Every score carries a bootstrap 95% confidence interval (1,000 resamples, seed 42), computed in `summary.json`. This replaces running extra seeds.
-- **Ablations:** ingestion only, reweighting only, both.
 - **Cost:** cumulative extraction calls per iteration, reported next to accuracy.
 - **Load test:** 50 concurrent queries while a repair batch is writing. Report p50 and p95 latency.
 
@@ -153,12 +152,18 @@ The algorithm is not tied to the dataset. It needs a corpus, questions and a fee
 | --- | --- |
 | Gold answer and evidence (the benchmark) | All repairs, with evidence-coverage diagnosis |
 | Gold answer only | All repairs, with coarser diagnosis from graph checks on the seed and answer entities |
-| Thumbs down only | Schema growth, by re-reading chunks around the seed. Reweighting can only decay the path used |
+| Thumbs down only | Schema growth, by re-reading chunks around the seed |
 | No feedback | Budgeted extraction on dead-ends and low path scores |
 
 - **Classifier back-ends:** evidence coverage for the benchmark, answer-only and dead-end checks for real use, behind one interface.
 - **Question types:** in production they come from the LLM's own classification or its predicted relation chain.
 - **Limits:** the approach fits multi-hop factual lookup. It fits poorly for summarisation or "explain why" questions. It transfers across entities, not to relation types it has never seen fail.
+
+## Future work
+
+- **Relation reweighting:** learn `RelType.weight` per (question type, relation) from ranking gaps, raising relations on the gold chain and decaying those on the chosen path. Left out because ranking gaps were 0 at iteration 0 and 2 after repair.
+- **Alias repair** for entity gaps (a seed that does not resolve).
+- **A second corpus** run through the same engine.
 
 ## 30-hour build plan
 
@@ -170,8 +175,8 @@ The iteration-0 number must exist by hour 9. Everything after that is the loop.
 | 2–6 | Shallow ingest (chunks, entities, literals, a small seed schema) and the query pipeline | A question returns an answer with its path |
 | 6–9 | Eval harness, entity-disjoint split, BM25 and static-graph baselines | Iteration-0 numbers saved to JSON. Due 15 Nov 12:00 IST |
 | 9–14 | Evidence-coverage classifier, schema growth, budgeted targeted extraction | Failures are labelled and repairs write `Mutation` nodes |
-| 14–18 | Reweighting and the random-policy control. Run five iterations | The curve exists |
-| 18–21 | Ablations, bootstrap CIs, load test | Numbers for the README |
+| 14–18 | The random-policy control. Run five iterations | The curve exists |
+| 18–21 | Paired comparisons, load test | Numbers for the README |
 | 21–25 | Streamlit demo: curve, path viewer, mutation log | A two-minute walkthrough works |
 | 25–28 | Pitch, README, demo video | Submission draft complete |
 | 28–30 | Buffer and submit. The buffer ends 16 Nov 07:00 IST | Submitted |

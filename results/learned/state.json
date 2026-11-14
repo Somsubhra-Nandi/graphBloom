@@ -1,23 +1,60 @@
 {
  "policy": "learned",
- "next_iteration": 2,
- "growth_applied": 1,
+ "seed": 42,
+ "next_iteration": 6,
+ "growth_applied": 5,
  "added": {
   "1": [
    "father",
    "date of death"
+  ],
+  "2": [
+   "place of death",
+   "mother"
+  ],
+  "3": [
+   "spouse",
+   "country"
+  ],
+  "4": [
+   "award received",
+   "employer"
+  ],
+  "5": [
+   "inception",
+   "educated at"
   ]
  },
  "iterations": {
   "0": {
    "heldout_em": 0.4713,
    "heldout_f1": 0.5965,
-   "cost_usd": 0.43748
+   "cost_usd": 0.0
   },
   "1": {
    "heldout_em": 0.5287,
    "heldout_f1": 0.6465,
-   "cost_usd": 0.46124
+   "cost_usd": 0.0
+  },
+  "2": {
+   "heldout_em": 0.5402,
+   "heldout_f1": 0.6626,
+   "cost_usd": 0.0
+  },
+  "3": {
+   "heldout_em": 0.5517,
+   "heldout_f1": 0.6828,
+   "cost_usd": 0.0
+  },
+  "4": {
+   "heldout_em": 0.5747,
+   "heldout_f1": 0.7,
+   "cost_usd": 0.0
+  },
+  "5": {
+   "heldout_em": 0.5747,
+   "heldout_f1": 0.7,
+   "cost_usd": 0.0
   }
  },
  "pool": {

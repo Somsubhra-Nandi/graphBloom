@@ -1,0 +1,21 @@
+{
+ "note": "Learning-phase dollars per run from the spend ledger. The committed learned, random and random_s7 results were re-run from the response cache at $0 in places (the learned run was rebuilt from cache to save the learned_iter5 snapshot; random seed 42 reused calls from an aborted first attempt), so per-iteration cost_usd inside each iterN/summary.json can read 0. These are the real figures.",
+ "learning_phase_usd": {
+  "learned": 2.5837,
+  "random": 0.645,
+  "random_s7": 0.6486,
+  "total": 3.8773
+ },
+ "learned_per_iteration_usd": {
+  "0": 0.43748,
+  "1": 0.46124,
+  "2": 0.48983,
+  "3": 0.41779,
+  "4": 0.37187,
+  "5": 0.40552
+ },
+ "baselines_usd": {
+  "static_graph": 0.2624,
+  "bm25": 0.1723
+ }
+}

@@ -14,6 +14,24 @@ from src import config
 STORE = config.ROOT / ".hydradb" / "store"
 STATE_FILES = ["index.json", "ingested.json"]
 SNAP = config.SNAPSHOT_DIR / "iter0"
+LIVE_PATH = config.STATE_DIR / "live_graph.json"  # which run / iteration / snapshot the live graph is in
+
+
+def snap_dir(name):
+    return config.SNAPSHOT_DIR / name
+
+
+def get_live():
+    return json.loads(LIVE_PATH.read_text()) if LIVE_PATH.exists() else {}
+
+
+def set_live(**kw):
+    """Record what the live graph is (run, iteration, the snapshot it was last restored from or saved as)."""
+    cur = get_live()
+    cur.update(kw)
+    LIVE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    LIVE_PATH.write_text(json.dumps(cur))
+    return cur
 
 
 def _docker(*args):
@@ -52,37 +70,43 @@ def counts():
     return c
 
 
-def make_snapshot():
-    """Copy the live graph and state to data/snapshots/iter0 (once). The live graph must be the iteration-0 graph."""
-    if SNAP.exists():
-        return json.loads((SNAP / "meta.json").read_text())
+def make_snapshot(name="iter0"):
+    """Copy the live graph and state to data/snapshots/<name> (once). For iter0 the live graph must be the
+    iteration-0 graph; other names save whatever the live graph currently is, with its run/iteration."""
+    snap = snap_dir(name)
+    if snap.exists():
+        return json.loads((snap / "meta.json").read_text())
     meta = counts()
+    meta["live"] = get_live()
 
     def copy():
-        SNAP.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(STORE, SNAP / "store")
+        snap.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(STORE, snap / "store")
         for f in STATE_FILES:
             if (config.STATE_DIR / f).exists():
-                shutil.copy(config.STATE_DIR / f, SNAP / f)
+                shutil.copy(config.STATE_DIR / f, snap / f)
 
     _restart_with(copy)
-    (SNAP / "meta.json").write_text(json.dumps(meta))
+    (snap / "meta.json").write_text(json.dumps(meta))
     return meta
 
 
-def restore_snapshot():
-    """Put the iteration-0 graph and state back. Verifies the entity and edge counts match the snapshot."""
-    meta = json.loads((SNAP / "meta.json").read_text())
+def restore_snapshot(name="iter0"):
+    """Put a saved graph and state back. Verifies the entity and edge counts match the snapshot."""
+    snap = snap_dir(name)
+    meta = json.loads((snap / "meta.json").read_text())
 
     def copy():
         shutil.rmtree(STORE)
-        shutil.copytree(SNAP / "store", STORE)
+        shutil.copytree(snap / "store", STORE)
         for f in STATE_FILES:
-            if (SNAP / f).exists():
-                shutil.copy(SNAP / f, config.STATE_DIR / f)
+            if (snap / f).exists():
+                shutil.copy(snap / f, config.STATE_DIR / f)
 
     _restart_with(copy)
     now = counts()
-    if now != meta:
-        raise RuntimeError(f"restore mismatch: snapshot {meta}, restored {now}")
+    expected = {k: v for k, v in meta.items() if k != "live"}
+    if now != expected:
+        raise RuntimeError(f"restore mismatch: snapshot {expected}, restored {now}")
+    set_live(**{**meta.get("live", {}), "snapshot": name})
     return now

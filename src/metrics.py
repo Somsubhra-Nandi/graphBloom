@@ -42,3 +42,17 @@ def bootstrap_ci(values, resamples=1000, seed=42, alpha=0.05):
     rng = random.Random(seed)
     means = sorted(sum(values[rng.randrange(n)] for _ in range(n)) / n for _ in range(resamples))
     return [round(means[int(alpha / 2 * resamples)], 4), round(means[int((1 - alpha / 2) * resamples) - 1], 4)]
+
+
+def paired_bootstrap(diffs, resamples=10000, seed=42, alpha=0.05):
+    """Paired bootstrap over per-question differences (a - b): mean, 95% percentile CI, and the share of
+    resamples whose mean difference is <= 0."""
+    n = len(diffs)
+    rng = random.Random(seed)
+    means = sorted(sum(diffs[rng.randrange(n)] for _ in range(n)) / n for _ in range(resamples))
+    return {
+        "n": n,
+        "mean_diff": round(sum(diffs) / n, 4),
+        "ci95": [round(means[int(alpha / 2 * resamples)], 4), round(means[int((1 - alpha / 2) * resamples) - 1], 4)],
+        "share_le_0": round(sum(1 for m in means if m <= 0) / resamples, 4),
+    }

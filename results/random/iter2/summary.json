@@ -1,0 +1,124 @@
+{
+ "iteration": 2,
+ "active_schema": [
+  "director",
+  "date of birth",
+  "publication date",
+  "country of citizenship",
+  "place of birth",
+  "country of origin",
+  "performer",
+  "composer",
+  "mother",
+  "award received",
+  "sibling",
+  "inception"
+ ],
+ "added": [
+  "sibling",
+  "inception"
+ ],
+ "heldout": {
+  "overall": {
+   "n": 87,
+   "em": 0.4828,
+   "em_ci95": [
+    0.3793,
+    0.5862
+   ],
+   "f1": 0.6014,
+   "f1_ci95": [
+    0.5106,
+    0.692
+   ]
+  },
+  "by_type": {
+   "bridge_comparison": {
+    "n": 16,
+    "em": 0.8125,
+    "em_ci95": [
+     0.625,
+     1.0
+    ],
+    "f1": 0.849,
+    "f1_ci95": [
+     0.6615,
+     1.0
+    ]
+   },
+   "comparison": {
+    "n": 21,
+    "em": 0.6667,
+    "em_ci95": [
+     0.4762,
+     0.8571
+    ],
+    "f1": 0.8426,
+    "f1_ci95": [
+     0.6984,
+     0.9537
+    ]
+   },
+   "compositional": {
+    "n": 38,
+    "em": 0.3684,
+    "em_ci95": [
+     0.2368,
+     0.5263
+    ],
+    "f1": 0.4975,
+    "f1_ci95": [
+     0.3571,
+     0.6447
+    ]
+   },
+   "inference": {
+    "n": 12,
+    "em": 0.0833,
+    "em_ci95": [
+     0.0,
+     0.25
+    ],
+    "f1": 0.1786,
+    "f1_ci95": [
+     0.0278,
+     0.3691
+    ]
+   }
+  },
+  "by_hops": {
+   "1": {
+    "n": 21,
+    "em": 0.6667,
+    "em_ci95": [
+     0.4762,
+     0.8571
+    ],
+    "f1": 0.8426,
+    "f1_ci95": [
+     0.6984,
+     0.9537
+    ]
+   },
+   "2": {
+    "n": 66,
+    "em": 0.4242,
+    "em_ci95": [
+     0.3182,
+     0.5303
+    ],
+    "f1": 0.5247,
+    "f1_ci95": [
+     0.4102,
+     0.6367
+    ]
+   }
+  },
+  "query_extraction_calls": 1,
+  "queries_with_events": 40,
+  "cost_usd": 0.06544,
+  "questions": "87/87"
+ },
+ "cost_usd": 0.06544,
+ "seconds": 16
+}

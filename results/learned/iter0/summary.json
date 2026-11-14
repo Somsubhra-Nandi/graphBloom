@@ -259,10 +259,10 @@
     "founded by": 1
    }
   },
-  "cost_usd": 0.43748,
+  "cost_usd": 0.0,
   "answered": true
  },
  "blame_pairs_updated": 26,
- "cost_usd": 0.43748,
- "seconds": 100
+ "cost_usd": 0.0,
+ "seconds": 1
 }

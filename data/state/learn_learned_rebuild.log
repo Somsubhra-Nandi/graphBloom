@@ -1,0 +1,43 @@
+restored iteration-0 snapshot: {'entities': 3712, 'REL edges': 2581, 'chunks': 1748}
+
+=== learned iteration 0 ===
+  held-out: 87/87 EM 0.4713 [0.3678, 0.5747] F1 0.5965  query-time extraction calls 0  cost $0.0
+  feedback (answered): diagnosis {'correct': 59, 'extraction_gap': 85, 'reasoning_gap': 6}  cost $0.0
+  iteration cost $0.0
+
+=== learned iteration 1 ===
+  schema grew by: [('father', 'blame_count 28 (summed over question types)'), ('date of death', 'blame_count 17 (summed over question types)')]
+  repair extraction: {'chunks_extracted': 55, 'edges_added': 27, 'date_values_added': 30, 'requests': 55, 'batch': None, 'cost_usd': 0.0}
+  held-out: 87/87 EM 0.5287 [0.4253, 0.6322] F1 0.6465  query-time extraction calls 24  cost $0.0
+  feedback (graph-only): diagnosis {'evidence_present': 65, 'ranking_gap': 2, 'extraction_gap': 83}  cost $0.0
+  iteration cost $0.0
+
+=== learned iteration 2 ===
+  schema grew by: [('place of death', 'blame_count 16 (summed over question types)'), ('mother', 'blame_count 14 (summed over question types)')]
+  repair extraction: {'chunks_extracted': 27, 'edges_added': 25, 'date_values_added': 0, 'requests': 27, 'batch': None, 'cost_usd': 0.0}
+  held-out: 87/87 EM 0.5402 [0.4368, 0.6437] F1 0.6626  query-time extraction calls 10  cost $0.0
+  feedback (answered): diagnosis {'correct': 78, 'ranking_gap': 2, 'reasoning_gap': 7, 'extraction_gap': 62, 'entity_gap': 1}  cost $0.0
+  iteration cost $0.0
+
+=== learned iteration 3 ===
+  schema grew by: [('spouse', 'blame_count 12 (summed over question types)'), ('country', 'blame_count 5 (summed over question types)')]
+  repair extraction: {'chunks_extracted': 19, 'edges_added': 19, 'date_values_added': 0, 'requests': 19, 'batch': None, 'cost_usd': 0.0}
+  held-out: 87/87 EM 0.5517 [0.4483, 0.6552] F1 0.6828  query-time extraction calls 17  cost $0.0
+  feedback (graph-only): diagnosis {'evidence_present': 81, 'ranking_gap': 6, 'extraction_gap': 62, 'entity_gap': 1}  cost $0.0
+  iteration cost $0.0
+
+=== learned iteration 4 ===
+  schema grew by: [('award received', 'blame_count 3 (summed over question types)'), ('employer', 'blame_count 3 (summed over question types)')]
+  repair extraction: {'chunks_extracted': 6, 'edges_added': 17, 'date_values_added': 0, 'requests': 6, 'batch': None, 'cost_usd': 0.0}
+  held-out: 87/87 EM 0.5747 [0.4713, 0.6782] F1 0.7  query-time extraction calls 4  cost $0.0
+  feedback (graph-only): diagnosis {'evidence_present': 84, 'ranking_gap': 6, 'extraction_gap': 59, 'entity_gap': 1}  cost $0.0
+  iteration cost $0.0
+
+=== learned iteration 5 ===
+  schema grew by: [('inception', 'blame_count 3 (summed over question types)'), ('educated at', 'blame_count 2 (summed over question types)')]
+  repair extraction: {'chunks_extracted': 7, 'edges_added': 2, 'date_values_added': 6, 'requests': 7, 'batch': None, 'cost_usd': 0.0}
+  held-out: 87/87 EM 0.5747 [0.4713, 0.6782] F1 0.7  query-time extraction calls 3  cost $0.0
+  feedback (answered): diagnosis {'correct': 85, 'ranking_gap': 5, 'reasoning_gap': 9, 'extraction_gap': 50, 'entity_gap': 1}  cost $0.0
+  iteration cost $0.0
+[llm:learn:learned] fresh_calls=0 cache_hits=2564 in=0 out=0 cost=$0.0000 retries=0 truncated=0
+[spend] total $5.2959 of $9.00 (+$0.0000 pending) | ingest $2.0557 / $2.06 | smoke $0.4653 / $0.47 | learning $2.7748 / $5.47 | reserve $1.00 left of $1.00

@@ -30,6 +30,7 @@ from src.classifier import Diagnoser, load_feedback, summarize as summarize_diag
 from src.evaluation import run_questions, summarize  # noqa: E402
 from src.graph import Graph, normalize  # noqa: E402
 from src.literals import normalize_literal  # noqa: E402
+from src.mutations import export as export_mutations  # noqa: E402
 from src.query import QueryEngine  # noqa: E402
 from src.schema import ActiveSchema  # noqa: E402
 
@@ -58,17 +59,20 @@ def load_reltypes(g):
 
 
 def apply_blame(g, rt, diag_rows):
-    """Each missing gold triple adds 1 to blame_count on RelType(question type, relation); new pairs are created."""
-    dirty = set()
-    for row in diag_rows:
-        for rel in row["missing_relations"]:
-            key = (row["type"], rel)
-            if key not in rt:
-                i = g.index.new_id()
-                g.index.d["reltypes"][f"{key[0]}|{rel}"] = i
-                rt[key] = {"id": i, "qtype": key[0], "name": rel, "weight": 1.0, "blame": 0}
-            rt[key]["blame"] += 1
-            dirty.add(key)
+    """blame_count on RelType(question type, relation) = the number of current extraction gaps for that pair,
+    recomputed from this iteration's diagnosis (not accumulated). New pairs are created. Returns pairs changed."""
+    counts = Counter((r["type"], rel) for r in diag_rows for rel in r["missing_relations"])
+    for key in counts:
+        if key not in rt:
+            i = g.index.new_id()
+            g.index.d["reltypes"][f"{key[0]}|{key[1]}"] = i
+            rt[key] = {"id": i, "qtype": key[0], "name": key[1], "weight": 1.0, "blame": -1}  # -1 forces the first write
+    dirty = []
+    for key, v in rt.items():
+        new = counts.get(key, 0)
+        if v["blame"] != new:
+            v["blame"] = new
+            dirty.append(key)
     g.index.save()
     g.write_reltypes([{"id": rt[k]["id"], "name": k[1], "qtype": k[0], "weight": rt[k]["weight"], "blame_count": rt[k]["blame"]} for k in sorted(dirty)])
     return len(dirty)
@@ -83,9 +87,9 @@ def choose_learned(rt, schema, pool):
     return [{"relation": n, "reason": f"blame_count {b} (summed over question types)"} for n, b in cands[: config.LEARN_MAX_NEW_RELATIONS]]
 
 
-def choose_random(k, schema, pool, it):
+def choose_random(k, schema, pool, it, seed):
     avail = sorted(r for r in pool if schema.canonical(r) is None)
-    rng = random.Random(f"{config.LEARN_SEED}-{it}")  # seed 42, one draw per iteration
+    rng = random.Random(f"{seed}-{it}")  # one draw per iteration, seeded
     return [{"relation": r, "reason": f"uniform random draw of {k} from a pool of {len(avail)}"} for r in rng.sample(avail, min(k, len(avail)))]
 
 
@@ -182,11 +186,13 @@ def main():
     ap.add_argument("--policy", required=True, choices=["learned", "random"])
     ap.add_argument("--until", type=int, default=config.LEARN_ITERATIONS, help="last iteration to run")
     ap.add_argument("--fresh", action="store_true", help="restore the iteration-0 snapshot and start over")
+    ap.add_argument("--seed", type=int, default=config.LEARN_SEED, help="random policy seed")
+    ap.add_argument("--run-name", help="results directory name (default: the policy name)")
     ap.add_argument("--workers", type=int, default=config.LLM_WORKERS)
     ap.add_argument("--use-reserve", action="store_true")
     args = ap.parse_args()
     llm.set_use_reserve(args.use_reserve)
-    run = args.policy
+    run = args.run_name or args.policy
     run_dir = config.ROOT / "results" / run
     state_path = run_dir / "state.json"
     sch_path = config.RUNS_DIR / run / "schema.json"
@@ -209,8 +215,8 @@ def main():
             shutil.rmtree(f)
         if sch_path.exists():
             sch_path.unlink()
-        state = {"policy": run, "next_iteration": 0, "growth_applied": -1, "added": {}, "iterations": {}, "pool": pool}
-        live_path.write_text(json.dumps({"run": run}))
+        state = {"policy": args.policy, "seed": args.seed, "next_iteration": 0, "growth_applied": -1, "added": {}, "iterations": {}, "pool": pool}
+        snapshot.set_live(run=run, base_snapshot="iter0", snapshot="iter0", iteration=-1)
     else:
         state = json.loads(state_path.read_text())
         live = json.loads(live_path.read_text()).get("run") if live_path.exists() else None
@@ -221,7 +227,7 @@ def main():
     g = Graph(schema=schema)
     rt = load_reltypes(g)
     learned_counts = None
-    if run == "random":
+    if args.policy == "random":
         lp = config.ROOT / "results" / "learned" / "state.json"
         if not lp.exists():
             sys.exit("run the learned policy first: random needs its per-iteration counts")
@@ -232,13 +238,13 @@ def main():
         info = {"iteration": it}
         print(f"\n=== {run} iteration {it} ===", flush=True)
         if it >= 1 and state["growth_applied"] < it:
-            if run == "learned":
+            if args.policy == "learned":
                 added = choose_learned(rt, schema, pool)
             else:
                 if it not in learned_counts:
                     print(f"learned has not reached iteration {it} yet; stopping")
                     break
-                added = choose_random(learned_counts[it], schema, pool, it)
+                added = choose_random(learned_counts[it], schema, pool, it, args.seed)
             grow(g, schema, added, it, pool)
             schema.save(sch_path)
             state["added"][str(it)] = [a["relation"] for a in added]
@@ -246,7 +252,7 @@ def main():
             state_path.parent.mkdir(parents=True, exist_ok=True)
             state_path.write_text(json.dumps(state, indent=1))
             print("  schema grew by:", [(a["relation"], a["reason"]) for a in added])
-            if run == "learned":
+            if args.policy == "learned":
                 prev = [json.loads(l) for l in open(run_dir / f"iter{it - 1}" / "diagnosis.jsonl")]
                 info["repair_extraction"] = repair_extraction(g, schema, prev, it)
                 print("  repair extraction:", info["repair_extraction"])
@@ -260,7 +266,7 @@ def main():
         if err:
             print("STOPPED:", err)
             break
-        if run == "learned":
+        if args.policy == "learned":
             diag, fsum, fcost, err = eval_feedback(g, schema, it, run_dir, args.workers)
             info["feedback"] = {"summary": fsum, "diagnosis": summarize_diag(diag), "cost_usd": fcost, "answered": it in config.FEEDBACK_ANSWER_ITERATIONS}
             if err:
@@ -275,6 +281,8 @@ def main():
         state["iterations"][str(it)] = {"heldout_em": o.get("em"), "heldout_f1": o.get("f1"), "cost_usd": info["cost_usd"]}
         state["next_iteration"] = it + 1
         state_path.write_text(json.dumps(state, indent=1))
+        export_mutations(g, run_dir / "mutations.jsonl")
+        snapshot.set_live(run=run, iteration=it, snapshot=None)  # the live graph has moved on from any restored snapshot  # a snapshot restore wipes the graph's Mutation nodes
         print(f"  iteration cost ${info['cost_usd']}")
     llm.log_stats(f"learn:{run}")
     g.close()

@@ -5,15 +5,8 @@
   "edges_added": 27,
   "date_values_added": 30,
   "requests": 55,
-  "batch": {
-   "status": "ended",
-   "succeeded": 55,
-   "failed": 0,
-   "cost": 0.0427365,
-   "input_tokens": 62648,
-   "output_tokens": 4565
-  },
-  "cost_usd": 0.04274
+  "batch": null,
+  "cost_usd": 0.0
  },
  "active_schema": [
   "director",
@@ -129,7 +122,7 @@
   },
   "query_extraction_calls": 24,
   "queries_with_events": 40,
-  "cost_usd": 0.19832,
+  "cost_usd": 0.0,
   "questions": "87/87"
  },
  "feedback": {
@@ -181,10 +174,10 @@
     "founded by": 1
    }
   },
-  "cost_usd": 0.22019,
+  "cost_usd": 0.0,
   "answered": false
  },
- "blame_pairs_updated": 23,
- "cost_usd": 0.46124,
- "seconds": 195
+ "blame_pairs_updated": 5,
+ "cost_usd": 0.0,
+ "seconds": 5
 }

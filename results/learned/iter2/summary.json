@@ -1,0 +1,287 @@
+{
+ "iteration": 2,
+ "repair_extraction": {
+  "chunks_extracted": 27,
+  "edges_added": 25,
+  "date_values_added": 0,
+  "requests": 27,
+  "batch": null,
+  "cost_usd": 0.0
+ },
+ "active_schema": [
+  "director",
+  "date of birth",
+  "publication date",
+  "country of citizenship",
+  "place of birth",
+  "country of origin",
+  "performer",
+  "composer",
+  "father",
+  "date of death",
+  "place of death",
+  "mother"
+ ],
+ "added": [
+  "place of death",
+  "mother"
+ ],
+ "heldout": {
+  "overall": {
+   "n": 87,
+   "em": 0.5402,
+   "em_ci95": [
+    0.4368,
+    0.6437
+   ],
+   "f1": 0.6626,
+   "f1_ci95": [
+    0.5726,
+    0.7539
+   ]
+  },
+  "by_type": {
+   "bridge_comparison": {
+    "n": 16,
+    "em": 0.875,
+    "em_ci95": [
+     0.6875,
+     1.0
+    ],
+    "f1": 0.9115,
+    "f1_ci95": [
+     0.7708,
+     1.0
+    ]
+   },
+   "comparison": {
+    "n": 21,
+    "em": 0.7143,
+    "em_ci95": [
+     0.5238,
+     0.9048
+    ],
+    "f1": 0.922,
+    "f1_ci95": [
+     0.8653,
+     0.9746
+    ]
+   },
+   "compositional": {
+    "n": 38,
+    "em": 0.4211,
+    "em_ci95": [
+     0.2632,
+     0.5789
+    ],
+    "f1": 0.5672,
+    "f1_ci95": [
+     0.4296,
+     0.7097
+    ]
+   },
+   "inference": {
+    "n": 12,
+    "em": 0.1667,
+    "em_ci95": [
+     0.0,
+     0.4167
+    ],
+    "f1": 0.1786,
+    "f1_ci95": [
+     0.0,
+     0.4167
+    ]
+   }
+  },
+  "by_hops": {
+   "1": {
+    "n": 21,
+    "em": 0.7143,
+    "em_ci95": [
+     0.5238,
+     0.9048
+    ],
+    "f1": 0.922,
+    "f1_ci95": [
+     0.8653,
+     0.9746
+    ]
+   },
+   "2": {
+    "n": 66,
+    "em": 0.4848,
+    "em_ci95": [
+     0.3788,
+     0.5909
+    ],
+    "f1": 0.58,
+    "f1_ci95": [
+     0.4796,
+     0.6825
+    ]
+   }
+  },
+  "query_extraction_calls": 10,
+  "queries_with_events": 34,
+  "cost_usd": 0.0,
+  "questions": "87/87"
+ },
+ "feedback": {
+  "summary": {
+   "overall": {
+    "n": 150,
+    "em": 0.52,
+    "em_ci95": [
+     0.44,
+     0.6067
+    ],
+    "f1": 0.6434,
+    "f1_ci95": [
+     0.5723,
+     0.7157
+    ]
+   },
+   "by_type": {
+    "bridge_comparison": {
+     "n": 33,
+     "em": 0.9394,
+     "em_ci95": [
+      0.8485,
+      1.0
+     ],
+     "f1": 0.9394,
+     "f1_ci95": [
+      0.8485,
+      1.0
+     ]
+    },
+    "comparison": {
+     "n": 36,
+     "em": 0.7778,
+     "em_ci95": [
+      0.6389,
+      0.8889
+     ],
+     "f1": 0.8913,
+     "f1_ci95": [
+      0.7885,
+      0.9713
+     ]
+    },
+    "compositional": {
+     "n": 62,
+     "em": 0.2581,
+     "em_ci95": [
+      0.1613,
+      0.371
+     ],
+     "f1": 0.4433,
+     "f1_ci95": [
+      0.3362,
+      0.5523
+     ]
+    },
+    "inference": {
+     "n": 19,
+     "em": 0.1579,
+     "em_ci95": [
+      0.0,
+      0.3158
+     ],
+     "f1": 0.3128,
+     "f1_ci95": [
+      0.134,
+      0.5108
+     ]
+    }
+   },
+   "by_hops": {
+    "1": {
+     "n": 36,
+     "em": 0.7778,
+     "em_ci95": [
+      0.6389,
+      0.8889
+     ],
+     "f1": 0.8913,
+     "f1_ci95": [
+      0.7885,
+      0.9713
+     ]
+    },
+    "2": {
+     "n": 114,
+     "em": 0.4386,
+     "em_ci95": [
+      0.3509,
+      0.5263
+     ],
+     "f1": 0.5652,
+     "f1_ci95": [
+      0.485,
+      0.6471
+     ]
+    }
+   }
+  },
+  "diagnosis": {
+   "overall": {
+    "correct": 78,
+    "ranking_gap": 2,
+    "reasoning_gap": 7,
+    "extraction_gap": 62,
+    "entity_gap": 1
+   },
+   "by_type": {
+    "bridge_comparison": {
+     "correct": 31,
+     "ranking_gap": 1,
+     "reasoning_gap": 1
+    },
+    "comparison": {
+     "correct": 28,
+     "extraction_gap": 4,
+     "reasoning_gap": 4
+    },
+    "compositional": {
+     "correct": 16,
+     "extraction_gap": 42,
+     "reasoning_gap": 2,
+     "entity_gap": 1,
+     "ranking_gap": 1
+    },
+    "inference": {
+     "extraction_gap": 16,
+     "correct": 3
+    }
+   },
+   "questions_with_missing_gold_triples": 73,
+   "missing_relations": {
+    "father": 14,
+    "place of birth": 13,
+    "spouse": 12,
+    "place of death": 9,
+    "director": 5,
+    "country": 5,
+    "country of citizenship": 5,
+    "publication date": 4,
+    "mother": 4,
+    "inception": 3,
+    "award received": 3,
+    "employer": 3,
+    "educated at": 2,
+    "sibling": 2,
+    "place of burial": 1,
+    "performer": 1,
+    "publisher": 1,
+    "founded by": 1
+   }
+  },
+  "cost_usd": 0.0,
+  "answered": true
+ },
+ "blame_pairs_updated": 3,
+ "cost_usd": 0.0,
+ "seconds": 4
+}
