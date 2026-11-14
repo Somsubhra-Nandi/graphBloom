@@ -1,0 +1,30 @@
+{
+ "concurrent_queries": 50,
+ "rounds": 15,
+ "llm": "cache lookups only (no spend)",
+ "baseline_no_writes": {
+  "n": 750,
+  "p50_ms": 125,
+  "p95_ms": 178,
+  "max_ms": 234,
+  "mean_ms": 113,
+  "errors": 0
+ },
+ "with_concurrent_repair_writes": {
+  "n": 750,
+  "p50_ms": 154,
+  "p95_ms": 236,
+  "max_ms": 269,
+  "mean_ms": 139,
+  "errors": 0
+ },
+ "writer": {
+  "nodes_written": 14600,
+  "edges_written": 14600,
+  "seconds": 3.2,
+  "write_batch_p50_ms": 23,
+  "write_batch_p95_ms": 60,
+  "batch_size": 200
+ },
+ "test_nodes_left_after_cleanup": 0
+}
