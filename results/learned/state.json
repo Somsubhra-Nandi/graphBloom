@@ -1,0 +1,81 @@
+{
+ "policy": "learned",
+ "next_iteration": 2,
+ "growth_applied": 1,
+ "added": {
+  "1": [
+   "father",
+   "date of death"
+  ]
+ },
+ "iterations": {
+  "0": {
+   "heldout_em": 0.4713,
+   "heldout_f1": 0.5965,
+   "cost_usd": 0.43748
+  },
+  "1": {
+   "heldout_em": 0.5287,
+   "heldout_f1": 0.6465,
+   "cost_usd": 0.46124
+  }
+ },
+ "pool": {
+  "father": {
+   "count": 37,
+   "literal": false
+  },
+  "date of death": {
+   "count": 30,
+   "literal": true
+  },
+  "place of death": {
+   "count": 18,
+   "literal": false
+  },
+  "mother": {
+   "count": 14,
+   "literal": false
+  },
+  "spouse": {
+   "count": 12,
+   "literal": false
+  },
+  "country": {
+   "count": 11,
+   "literal": false
+  },
+  "inception": {
+   "count": 5,
+   "literal": true
+  },
+  "award received": {
+   "count": 3,
+   "literal": false
+  },
+  "employer": {
+   "count": 3,
+   "literal": false
+  },
+  "educated at": {
+   "count": 2,
+   "literal": false
+  },
+  "publisher": {
+   "count": 2,
+   "literal": false
+  },
+  "sibling": {
+   "count": 2,
+   "literal": false
+  },
+  "place of burial": {
+   "count": 1,
+   "literal": false
+  },
+  "founded by": {
+   "count": 1,
+   "literal": false
+  }
+ }
+}

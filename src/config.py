@@ -25,7 +25,9 @@ ANSWER_MAX_TOKENS = 200
 
 # --- Budget: hard cap on total spend for the whole project is $10; this leaves a $1 margin ---
 BUDGET_TOTAL_USD = 9.00
-PHASE_BUDGETS = {"ingest": 2.50, "smoke": 1.00, "learning": 4.50, "reserve": 1.00}  # reserve needs --use-reserve
+# Total stays $9.00. The unused ingest ($0.44) and smoke ($0.53) budget moved into learning on 2026-11-15;
+# ingest and smoke are now capped at what they already spent. The reserve needs --use-reserve.
+PHASE_BUDGETS = {"ingest": 2.06, "smoke": 0.47, "learning": 5.47, "reserve": 1.00}
 LEDGER_PATH = ROOT / "data" / "state" / "spend.json"
 
 # --- Data ---
@@ -78,3 +80,14 @@ def run_params():
         "extract_model": EXTRACT_MODEL, "answer_model": ANSWER_MODEL,
         "answer_prompt_sha": hashlib.sha256((ANSWER_SYSTEM + ANSWER_INSTRUCTION).encode()).hexdigest()[:12],
     }
+
+
+# --- Learning loop ---
+LEARN_SEED = 42
+LEARN_ITERATIONS = 5
+LEARN_MAX_NEW_RELATIONS = 2  # per iteration, learned policy
+LEARN_MIN_BLAME = 2  # a relation needs this much blame (summed over question types) to be added
+FEEDBACK_ANSWER_ITERATIONS = (0, 2, 5)  # feedback is re-answered (and ranking/reasoning gaps judged) only here
+QUERY_EXTRACT_BUDGET = 2  # targeted extraction calls per held-out query
+RUNS_DIR = ROOT / "data" / "runs"
+SNAPSHOT_DIR = ROOT / "data" / "snapshots"

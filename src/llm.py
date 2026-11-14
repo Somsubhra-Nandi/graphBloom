@@ -356,6 +356,12 @@ def collect_batch(batch_id, requests, phase, model=config.EXTRACT_MODEL, poll=15
 
 
 # ---------------------------------------------------------------- reporting
+def total_spent():
+    """Cumulative dollars in the persisted ledger."""
+    with _lock:
+        return _load()["total"]
+
+
 def run_stats():
     """Calls, tokens and cost of this process so far (fresh calls only; cache hits are free)."""
     with _lock:

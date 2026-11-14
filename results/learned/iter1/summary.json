@@ -1,0 +1,190 @@
+{
+ "iteration": 1,
+ "repair_extraction": {
+  "chunks_extracted": 55,
+  "edges_added": 27,
+  "date_values_added": 30,
+  "requests": 55,
+  "batch": {
+   "status": "ended",
+   "succeeded": 55,
+   "failed": 0,
+   "cost": 0.0427365,
+   "input_tokens": 62648,
+   "output_tokens": 4565
+  },
+  "cost_usd": 0.04274
+ },
+ "active_schema": [
+  "director",
+  "date of birth",
+  "publication date",
+  "country of citizenship",
+  "place of birth",
+  "country of origin",
+  "performer",
+  "composer",
+  "father",
+  "date of death"
+ ],
+ "added": [
+  "father",
+  "date of death"
+ ],
+ "heldout": {
+  "overall": {
+   "n": 87,
+   "em": 0.5287,
+   "em_ci95": [
+    0.4253,
+    0.6322
+   ],
+   "f1": 0.6465,
+   "f1_ci95": [
+    0.551,
+    0.7399
+   ]
+  },
+  "by_type": {
+   "bridge_comparison": {
+    "n": 16,
+    "em": 0.875,
+    "em_ci95": [
+     0.6875,
+     1.0
+    ],
+    "f1": 0.9115,
+    "f1_ci95": [
+     0.7708,
+     1.0
+    ]
+   },
+   "comparison": {
+    "n": 21,
+    "em": 0.7143,
+    "em_ci95": [
+     0.5238,
+     0.9048
+    ],
+    "f1": 0.922,
+    "f1_ci95": [
+     0.8653,
+     0.9746
+    ]
+   },
+   "compositional": {
+    "n": 38,
+    "em": 0.3947,
+    "em_ci95": [
+     0.2368,
+     0.5526
+    ],
+    "f1": 0.5304,
+    "f1_ci95": [
+     0.3842,
+     0.6668
+    ]
+   },
+   "inference": {
+    "n": 12,
+    "em": 0.1667,
+    "em_ci95": [
+     0.0,
+     0.4167
+    ],
+    "f1": 0.1786,
+    "f1_ci95": [
+     0.0,
+     0.4167
+    ]
+   }
+  },
+  "by_hops": {
+   "1": {
+    "n": 21,
+    "em": 0.7143,
+    "em_ci95": [
+     0.5238,
+     0.9048
+    ],
+    "f1": 0.922,
+    "f1_ci95": [
+     0.8653,
+     0.9746
+    ]
+   },
+   "2": {
+    "n": 66,
+    "em": 0.4697,
+    "em_ci95": [
+     0.3636,
+     0.5909
+    ],
+    "f1": 0.5588,
+    "f1_ci95": [
+     0.4493,
+     0.6632
+    ]
+   }
+  },
+  "query_extraction_calls": 24,
+  "queries_with_events": 40,
+  "cost_usd": 0.19832,
+  "questions": "87/87"
+ },
+ "feedback": {
+  "summary": null,
+  "diagnosis": {
+   "overall": {
+    "evidence_present": 65,
+    "ranking_gap": 2,
+    "extraction_gap": 83
+   },
+   "by_type": {
+    "bridge_comparison": {
+     "evidence_present": 30,
+     "ranking_gap": 2,
+     "extraction_gap": 1
+    },
+    "comparison": {
+     "extraction_gap": 11,
+     "evidence_present": 25
+    },
+    "compositional": {
+     "extraction_gap": 54,
+     "evidence_present": 8
+    },
+    "inference": {
+     "extraction_gap": 17,
+     "evidence_present": 2
+    }
+   },
+   "questions_with_missing_gold_triples": 83,
+   "missing_relations": {
+    "place of death": 16,
+    "father": 14,
+    "mother": 14,
+    "place of birth": 13,
+    "spouse": 12,
+    "director": 5,
+    "country": 5,
+    "country of citizenship": 5,
+    "publication date": 4,
+    "inception": 3,
+    "award received": 3,
+    "employer": 3,
+    "educated at": 2,
+    "sibling": 2,
+    "place of burial": 1,
+    "performer": 1,
+    "publisher": 1,
+    "founded by": 1
+   }
+  },
+  "cost_usd": 0.22019,
+  "answered": false
+ },
+ "blame_pairs_updated": 23,
+ "cost_usd": 0.46124,
+ "seconds": 195
+}

@@ -4,3 +4,5 @@ __pycache__/
 data/raw/
 .cache/
 .env
+data/snapshots/
+data/runs/

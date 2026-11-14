@@ -119,9 +119,10 @@ class Index:
 
 
 class Graph:
-    def __init__(self, index=None):
+    def __init__(self, index=None, schema=None):
         self.driver = GraphDatabase.driver(config.HYDRA_URI, auth=("neo4j", config.HYDRA_TOKEN))
         self.index = index or Index()
+        self.literal_props = list(schema.literal_props()) if schema else list(config.LITERAL_PROPS)
         self._reconcile_counter()
 
     def close(self):
@@ -161,7 +162,7 @@ class Graph:
         pending = list(self.index.d["pending"].values())
         if not pending:
             return
-        cols = [c for p in config.LITERAL_PROPS for c in (p, f"{p}_norm", f"{p}_approx")]
+        cols = [c for p in self.literal_props for c in (p, f"{p}_norm", f"{p}_approx")]
         props = "".join(f", n.{c} = row.{c}" for c in cols)
         rows = []
         for e in pending:
@@ -175,11 +176,42 @@ class Graph:
     def write_literals(self, prop, rows):
         """rows: {id, value, norm, approx}. Sets a date attribute on existing entities: the raw string, its
         normalized form (src/literals.py) in `<prop>_norm`, and `<prop>_approx` for 'c. 1732'."""
-        if prop not in config.LITERAL_PROPS:
+        if prop not in self.literal_props:
             raise ValueError(prop)
         self.write(
             f"MERGE (n {{id: row.id}}) SET n:Entity, n.{prop} = row.value, n.{prop}_norm = row.norm, n.{prop}_approx = row.approx", rows
         )
+
+    def add_literal_prop(self, prop):
+        """A date-valued relation joined the schema: give every existing entity the default value for it, so
+        every property is always written (IS NULL is unavailable). Run before any value for `prop` exists."""
+        if prop in self.literal_props:
+            return 0
+        self.literal_props.append(prop)
+        ids = [r["id"] for r in self.read("MATCH (n:Entity) RETURN n.id AS id")]
+        self.write(  # UNWIND SET values must come from the row map, so the defaults travel in the rows
+            f"MERGE (n {{id: row.id}}) SET n:Entity, n.{prop} = row.value, n.{prop}_norm = row.norm, n.{prop}_approx = row.approx",
+            [{"id": i, "value": "", "norm": "", "approx": False} for i in ids],
+        )
+        return len(ids)
+
+    def write_mutations(self, rows):
+        """rows: {id, iter, kind, reason, question_id}. Provenance for every change the learning loop makes."""
+        self.write("MERGE (n {id: row.id}) SET n:Mutation, n.iter = row.iter, n.kind = row.kind, n.reason = row.reason, n.question_id = row.question_id", rows)
+
+    def ensure_reltypes(self, relation):
+        """RelType nodes for a relation: one per question type plus the anchor EXTRACTED edges point at.
+        Returns the number created."""
+        rows = []
+        for qt in config.QUESTION_TYPES + [config.ANCHOR_QTYPE]:
+            key = f"{qt}|{relation}"
+            if key not in self.index.d["reltypes"]:
+                i = self.index.new_id()
+                self.index.d["reltypes"][key] = i
+                rows.append({"id": i, "name": relation, "qtype": qt, "weight": 1.0, "blame_count": 0})
+        self.index.save()
+        self.write_reltypes(rows)
+        return len(rows)
 
     def write_aliases(self, rows):
         """rows: {id, aliases}. `aliases` is the '|'-joined alias string kept on the entity for display."""

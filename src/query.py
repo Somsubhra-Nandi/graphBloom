@@ -23,16 +23,9 @@ ANSWER_SCHEMA = {
     "required": ["reasoning", "answer"],
 }
 
-# Relations whose value is a date stored as an attribute on the entity, not an edge.
-LITERAL_RELATIONS = {normalize(r) for r, (p, _) in config.SEED_RELATIONS.items() if p}
-
-
-def is_literal_step(rel):
-    n = normalize(rel)
-    return n in LITERAL_RELATIONS or n.startswith("date of ") or n.endswith(" date")
-
-
-def plan_prompt(question):
+def plan_prompt(question, relations=None):
+    """`relations` is the active schema: the planner's relation vocabulary (default: the 8 seed relations)."""
+    relations = relations or list(config.SEED_RELATIONS)
     return (
         f"Question: {question}\n\n"
         "Return:\n"
@@ -41,7 +34,7 @@ def plan_prompt(question):
         "compositional (an attribute of an entity reached through another relation, e.g. the mother of the director of a film), "
         "bridge_comparison (compare an attribute of entities reached through a bridge, e.g. which film's director was born earlier).\n"
         "- relation_chain: the relations to follow from the seed(s), in order, at most 3. The graph stores exactly these relation names: "
-        + ", ".join(config.SEED_RELATIONS)
+        + ", ".join(relations)
         + ". When a step is one of them, write it exactly as listed. For any other step use a short lowercase relation name of your own "
         "(for example father, mother, spouse, place of death, date of death). For comparison questions give the attribute being compared."
     )
@@ -63,9 +56,12 @@ def answer_from_prompt(prompt, phase):
 
 
 class QueryEngine:
-    def __init__(self, graph=None, phase="smoke"):
+    def __init__(self, graph=None, phase="smoke", schema=None):
+        from src.schema import ActiveSchema
+
         self.phase = phase
-        self.g = graph or Graph()
+        self.schema = schema or ActiveSchema()
+        self.g = graph or Graph(schema=self.schema)
         self.weights = {}
         self.load_weights()
         self._chunk_cache = {}
@@ -96,7 +92,7 @@ class QueryEngine:
         """Weighted beam over the edge steps of the planned chain. Literal steps (a date held as an attribute)
         are not traversed. A dead end is recorded only for a path that has followed the planned chain so far
         and has no edge of the next planned relation; leaves and literal steps do not count."""
-        steps = [normalize(c) for c in chain if not is_literal_step(c)][: config.MAX_HOPS]
+        steps = [normalize(c) for c in chain if not self.schema.is_literal(c)][: config.MAX_HOPS]
         terminal, dead_ends, final = [], [], []
         for sid, sname in seed_ids:
             frontier = [{"nodes": [(sid, sname)], "edges": [], "score": 1.0}]
@@ -135,12 +131,13 @@ class QueryEngine:
     # ---- context for the answer ---------------------------------------------
     def attributes(self, entity_ids):
         """Date attributes per entity: raw text, ISO form, approximate flag."""
-        cols = ", ".join(f"n.{p} AS {p}, n.{p}_norm AS {p}_norm, n.{p}_approx AS {p}_approx" for p in config.LITERAL_PROPS)
+        props = self.schema.literal_props()
+        cols = ", ".join(f"n.{p} AS {p}, n.{p}_norm AS {p}_norm, n.{p}_approx AS {p}_approx" for p in props)
         out = {}
         for i in entity_ids:
             rows = self.g.read(f"MATCH (n:Entity {{id: $id}}) RETURN {cols}", id=i)
             row, attrs = (rows[0] if rows else {}), {}
-            for p in config.LITERAL_PROPS:
+            for p in props:
                 if row.get(p):
                     attrs[p] = {"raw": row[p], "iso": row.get(f"{p}_norm") or "", "approx": bool(row.get(f"{p}_approx"))}
             if attrs:
@@ -161,23 +158,69 @@ class QueryEngine:
         return self._chunk_cache[chunk_id]
 
     # ---- the pipeline --------------------------------------------------------
-    def answer(self, question):
-        plan = llm.call(config.EXTRACT_MODEL, plan_prompt(question), system=PLAN_SYSTEM, schema=PLAN_SCHEMA, max_tokens=config.PLAN_MAX_TOKENS, phase=self.phase)
+    def events(self, chain, paths, seeds, dead_ends, attrs):
+        """Gaps that targeted extraction could fill: dead ends on the planned chain, and planned date steps whose
+        attribute is missing on the entity that should carry it."""
+        evs = [{"kind": "dead_end", "entity_id": d["entity_id"], "entity": d["entity"], "relation": d["expected_relation"]} for d in dead_ends]
+        edge_steps = [normalize(c) for c in chain if not self.schema.is_literal(c)][: config.MAX_HOPS]
+        holders = {n[0]: n[1] for p in paths if [normalize(e["type"]) for e in p["edges"]] == edge_steps for n in [p["nodes"][-1]]}
+        if not edge_steps:
+            holders = {i: n for i, n in seeds}
+        for c in chain:
+            canon = self.schema.canonical(c)
+            if canon and self.schema.relations[canon]["prop"]:
+                prop = self.schema.relations[canon]["prop"]
+                for eid, name in holders.items():
+                    if prop not in attrs.get(eid, {}):
+                        evs.append({"kind": "missing_literal", "entity_id": eid, "entity": name, "relation": canon})
+        return evs
+
+    def retrieve(self, question, extractor=None, question_id=None):
+        """Plan, resolve seeds, run the beam and gather attributes. No answer call. With an `extractor`
+        (held-out only), gaps found on the first pass may be filled and the search repeated once."""
+        plan = llm.call(config.EXTRACT_MODEL, plan_prompt(question, self.schema.names()), system=PLAN_SYSTEM, schema=PLAN_SCHEMA, max_tokens=config.PLAN_MAX_TOKENS, phase=self.phase)
         qtype, chain = plan["question_type"], plan["relation_chain"][: config.MAX_HOPS]
         resolved, unresolved = [], []
         for name in plan["seeds"]:
             i = self.g.index.resolve(name)
             (resolved if i is not None else unresolved).append((i, name) if i is not None else name)
         seeds = [(i, self.g.index.d["display"].get(str(i), n)) for i, n in resolved]
-
-        trace = {"question": question, "plan": plan, "seeds": [{"name": n, "id": i} for i, n in seeds], "unresolved_seeds": unresolved}
+        st = {"question": question, "plan": plan, "qtype": qtype, "chain": chain, "seeds": seeds, "unresolved": unresolved,
+              "paths": [], "dead_ends": [], "attrs": {}, "events": [], "query_extraction": []}
         if not seeds:
-            trace.update(paths=[], dead_ends=[], chunks=[], attributes={}, answer="", note="no seed resolved", run_params=config.run_params())
-            return trace
+            return st
 
-        paths, dead_ends = self.beam(seeds, qtype, chain)
-        ent_ids = sorted({n[0] for p in paths for n in p["nodes"]} | {i for i, _ in seeds})
-        attrs = self.attributes(ent_ids)
+        def search():
+            paths, dead_ends = self.beam(seeds, qtype, chain)
+            ent_ids = sorted({n[0] for p in paths for n in p["nodes"]} | {i for i, _ in seeds})
+            attrs = self.attributes(ent_ids)
+            return paths, dead_ends, attrs, self.events(chain, paths, seeds, dead_ends, attrs)
+
+        st["paths"], st["dead_ends"], st["attrs"], st["events"] = search()
+        if extractor and st["events"]:
+            performed = extractor(st["events"], question_id)
+            if performed:
+                st["query_extraction"] = performed
+                st["paths"], st["dead_ends"], st["attrs"], st["events"] = search()
+        return st
+
+    def trace_from_state(self, st):
+        """A retrieve() state as the JSON-friendly trace the classifier and the results files use (no answer yet)."""
+        return {
+            "question": st["question"], "plan": st["plan"],
+            "seeds": [{"name": n, "id": i} for i, n in st["seeds"]], "unresolved_seeds": st["unresolved"],
+            "paths": [{"nodes": [{"id": i, "name": n} for i, n in p["nodes"]], "edges": p["edges"], "score": round(p["score"], 4)} for p in st["paths"]],
+            "dead_ends": st["dead_ends"], "events": st["events"], "query_extraction": st["query_extraction"],
+            "attributes": {str(k): v for k, v in st["attrs"].items()},
+        }
+
+    def answer(self, question, extractor=None, question_id=None):
+        st = self.retrieve(question, extractor, question_id)
+        plan, seeds, paths, attrs = st["plan"], st["seeds"], st["paths"], st["attrs"]
+        trace = {"question": question, "plan": plan, "seeds": [{"name": n, "id": i} for i, n in seeds], "unresolved_seeds": st["unresolved"]}
+        if not seeds:
+            trace.update(paths=[], dead_ends=[], events=[], query_extraction=[], chunks=[], attributes={}, answer="", note="no seed resolved", run_params=config.run_params())
+            return trace
         chunk_ids = []  # in path-score order, first appearance, at most ANSWER_MAX_CHUNKS
         for p in paths:
             for e in p["edges"]:
@@ -198,7 +241,9 @@ class QueryEngine:
         answer, reasoning = answer_from_prompt(prompt, self.phase)
         trace.update(
             paths=[{"nodes": [{"id": i, "name": n} for i, n in p["nodes"]], "edges": p["edges"], "score": round(p["score"], 4)} for p in paths],
-            dead_ends=dead_ends,
+            dead_ends=st["dead_ends"],
+            events=st["events"],
+            query_extraction=st["query_extraction"],
             chunks=[{"id": c, "title": v["title"]} for c, v in chunks.items()],
             attributes={str(k): v for k, v in attrs.items()},
             answer=answer,

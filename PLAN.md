@@ -91,7 +91,7 @@ Each iteration answers the 150 feedback questions, classifies every failure by h
 | Failure | What to check | Repair |
 | --- | --- | --- |
 | Entity gap | A starting entity cannot be resolved to a node | Add the alias to the existing entity, in the Python dict and in the graph |
-| Extraction gap | A gold evidence triple has no matching edge or attribute in the graph | Add the relation type to the schema, raise its `blame_count`, extract it from the seed's chunks |
+| Extraction gap | A gold evidence triple has no matching edge or attribute in the graph | Raise `blame_count` on RelType(question type, relation). Once the relation is in the active schema, extract it from the gold subject's chunks |
 | Ranking gap | The evidence is in the graph but was not on the retrieved paths | Raise the weight of relation types on the gold chain, decay those on the chosen path |
 | Reasoning gap | The evidence was retrieved and the answer is still wrong | Log only. No graph change |
 
@@ -105,15 +105,28 @@ Implementation notes:
 
 The loop then re-scores the held-out set and records one point on the curve. Run five iterations.
 
+### What is learned: the active schema
+
+The thing being learned is the active schema, the set of relations the planner may use and the system extracts. It starts as the 8 seed relations and, for the static run, stays that way. The planner's relation vocabulary is always the active schema.
+
+- **Candidate pool:** the relations in the gold evidence of the 150 feedback questions, minus the active schema. Feedback only, recorded with the run.
+- **Learned policy:** each iteration, add the relations with the highest `blame_count` (summed over question types), at most 2 per iteration, and only those with `blame_count` of at least 2. Each extraction gap adds 1 to the blame of its (question type, relation), creating the `RelType` if it is new.
+- **Random policy:** each iteration, add the same number of relations the learned policy added that iteration, drawn uniformly at random from the candidate pool (seed 42).
+- **Identical across learned, random and static:** the query-time extraction budget, `CHAIN_BOOST`, k, the fetch limit and every prompt. They live in `config.py` and are recorded in each run's output.
+- **Feedback is re-answered only at iterations 0, 2 and 5.** At the other iterations the feedback questions are diagnosed without an answer call (planner and beam, then gold-evidence coverage), and repairs still run. Reasoning gaps are judged only when the question was re-answered.
+- **Repair extraction (learned only, feedback):** for each extraction gap whose relation is in the active schema, extract that relation from the gold subject's own chunks, skipping chunks that already have an `EXTRACTED` edge for it. Run as a batch. Written with `EXTRACTED` edges and `Mutation` nodes.
+- **Both policies start from the same iteration-0 graph snapshot** (`scripts/learn.py` restores it), so the runs cannot contaminate each other.
+
 ## Extraction budget
 
-Every query may spend at most two targeted extraction calls, and the learned policy decides which relation types to spend them on.
+Every held-out query may spend at most two targeted extraction calls. Which relations can be extracted depends on the active schema, which is where learned and random differ.
 
-- **Trigger:** the beam dead-ends at an entity. No labels are involved, so this is legal on held-out questions.
-- **Policy:** for the question's type, pick the relation types with the highest `blame_count` that have no `EXTRACTED` edge from the seed entity's chunks.
+- **Trigger:** the planned chain dead-ends at an entity, or a planned date step is missing on the entity that should carry it. Leaves and date steps that follow a complete chain do not count. No labels are involved, so this is legal on held-out questions.
+- **Policy:** extract the relation the planner asked for, which must be in the active schema, from that entity's own chunks, skipping chunks that already have an `EXTRACTED` edge for it. Normal (non-batch) calls, then the hop is retried.
+- **Held-out only.** Feedback questions learn through repair extraction instead.
 - **Cost unit:** one extraction call on one chunk for one relation type. Cost per call is roughly constant, so ranking by blame is enough. No improvement-per-cost estimate.
 - **Why per query, not per iteration:** a global budget of 20 chunks per iteration covers about 100 of 1,748 chunks over five iterations. Held-out chunks would almost never be chosen and the curve would stay flat.
-- **Control:** the same budget spent on randomly chosen relation types. Learned against random at equal cost is the comparison that shows the learning matters. The random policy runs on held-out only (5 iterations of 87 questions), so it never sees the feedback questions.
+- **Control:** the same per-query budget with the schema grown by random relation draws. Learned against random at equal cost is the comparison that shows the learning matters. The random policy runs on held-out only (5 iterations of 87 questions), so it never sees the feedback questions.
 
 ## Evaluation
 
@@ -122,7 +135,7 @@ The headline chart is held-out accuracy over five iterations for the learned pol
 | Line | What it is | What it proves |
 | --- | --- | --- |
 | Learned policy | Full loop: schema growth, reweighting, budgeted extraction | The system improves with use |
-| Random policy | Same per-query budget, relation types chosen at random. Runs on held-out only, never on the feedback questions | The gain comes from learning, not from extra extraction |
+| Random policy | Same per-query budget; the schema grows by the same number of relations per iteration, drawn at random from the candidate pool. Runs on held-out only, never on the feedback questions | The gain comes from learning, not from extra extraction |
 | Static graph | The iteration-0 shallow graph, never changed | The floor |
 | BM25 | Top-5 chunk retrieval by BM25, no graph | Whether the task needs the graph |
 
@@ -180,6 +193,10 @@ The one-line pitch: start with a cheap graph, and it deepens only where your use
 - **If time allows:** run the same code on a second small corpus, such as HydraDB's own docs, for the live demo. One engine on two corpora shows it is not benchmark-specific.
 
 Pitch what was measured. An incident-debugging story on a Wikipedia benchmark would not hold up under questions.
+
+## Budget
+
+Total spend for the whole project is capped at $10 and enforced in code at $9.00 (`src/llm.py`, ledger in `data/state/spend.json`). Phase caps: ingest $2.06 and smoke $0.47 (what they spent), learning $5.47, and a $1.00 reserve that needs `--use-reserve`. Cached calls cost nothing.
 
 ## Smoke test findings (v0.4.0)
 
