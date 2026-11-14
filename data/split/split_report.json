@@ -1,0 +1,67 @@
+{
+ "seed": 42,
+ "feedback": {
+  "bridge_comparison": 33,
+  "comparison": 36,
+  "compositional": 62,
+  "inference": 19
+ },
+ "candidates_drawn": 100,
+ "candidate_rounds": 1,
+ "candidates_by_type": {
+  "bridge_comparison": 22,
+  "comparison": 24,
+  "compositional": 42,
+  "inference": 12
+ },
+ "heldout_survivors": 87,
+ "heldout_survivors_by_type": {
+  "bridge_comparison": 16,
+  "comparison": 21,
+  "compositional": 38,
+  "inference": 12
+ },
+ "dropped": 13,
+ "feedback_entities": 453,
+ "top_shared_entities": [
+  [
+   "american",
+   4
+  ],
+  [
+   "italian",
+   2
+  ],
+  [
+   "australian",
+   2
+  ],
+  [
+   "ken annakin",
+   1
+  ],
+  [
+   "british",
+   1
+  ],
+  [
+   "california",
+   1
+  ],
+  [
+   "london",
+   1
+  ],
+  [
+   "haile gerima",
+   1
+  ],
+  [
+   "united states",
+   1
+  ]
+ ],
+ "corpus_paragraphs": 1748,
+ "corpus_title_conflicts": 5,
+ "questions_in_corpus": 250
+}

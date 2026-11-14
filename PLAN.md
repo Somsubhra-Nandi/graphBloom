@@ -10,8 +10,9 @@ The demo must prove one claim: on held-out questions about entities the system n
 
 - **Track:** 1, the self-improving graph.
 - **Mechanisms:** gap-driven ingestion (schema growth plus targeted extraction) and relation reweighting. Alias addition is a small third.
-- **Benchmark:** 2WikiMultihopQA, 250 questions pooled into one corpus of about 2,500 chunks.
-- **Stack:** Python and FastAPI, HydraDB over Bolt with the Neo4j Python driver, Streamlit for the demo.
+- **Benchmark:** 2WikiMultihopQA, 250 questions pooled into one corpus of 1,748 paragraphs.
+- **Stack:** Python and FastAPI, HydraDB v0.4.0 over Bolt with the Neo4j Python driver, Streamlit for the demo.
+- **Deadline:** submission is due 16 Nov 2026 at 09:00 IST.
 
 ## Core idea
 
@@ -26,10 +27,10 @@ Per-edge weights and per-question ingestion only help when the same question is 
 
 ## Benchmark and split
 
-We use 2WikiMultihopQA with 150 feedback questions and an entity-disjoint held-out set drawn from the remaining 100.
+We use 2WikiMultihopQA with 150 feedback questions and an entity-disjoint held-out set. 100 candidates were drawn and 87 survive the entity filter (seed 42, `scripts/make_split.py`).
 
 - **Why this dataset:** answers are short, so exact match and F1 work without an LLM judge. It labels question types and ships gold evidence triples, which make failure diagnosis mechanical. Confirm the format in the first hour.
-- **Corpus:** the paragraphs of all 250 questions pooled into one store, so retrieval is not handed the right ten paragraphs.
+- **Corpus:** the paragraphs of all 250 questions pooled into one store, deduplicated by title to 1,748 paragraphs, so retrieval is not handed the right ten paragraphs. `context` is dropped from the feedback and held-out files for the same reason.
 - **Entity-disjoint held-out:** drop any held-out question that shares an entity with the evidence of a feedback question.
 - **Leakage rule:** gold answers and gold evidence are read only for the 150 feedback questions. Held-out labels are used for scoring and nothing else.
 - **Fixed seed** for sampling and the split, recorded in the repo.
@@ -40,27 +41,48 @@ The graph holds the knowledge, the learned policy and the history of its own cha
 
 | Element | Kind | Key properties | Purpose |
 | --- | --- | --- | --- |
-| `Chunk` | Node | `id`, `title`, `text`, `extracted_relations` | Raw text, and which relation types were already extracted from it |
-| `Entity` | Node | `id`, `name`, `aliases`, `type`, literal attributes | Things questions are about. Dates and other literals live here as properties |
+| `Chunk` | Node | `id`, `title`, `text` | Raw text |
+| `Entity` | Node | `id`, `name`, `aliases`, `type`, literal attributes | Things questions are about. Dates and other literals live here as properties. Name and alias lookup is done in a Python dict, not in the graph |
 | `REL` | Edge, Entity to Entity | `type`, `confidence`, `src_chunk`, `created_iter` | One generic edge type, so weights can be applied by its `type` property |
-| `MENTIONS` | Edge, Chunk to Entity | none | Lets targeted extraction find the chunks for a seed entity |
-| `RelType` | Node | `name`, `qtype`, `weight`, `blame_count` | The learned policy, one node per (question type, relation type) |
+| `MENTIONS` | Edge, Chunk to Entity | `chunk` | Lets targeted extraction find the chunks for a seed entity |
+| `EXTRACTED` | Edge, Chunk to RelType | `rel_type`, `chunk` | Records which relation types were already extracted from a chunk. Filtered by equality on `rel_type` |
+| `RelType` | Node | `name`, `qtype`, `weight`, `blame_count` | The learned policy, one node per (question type, relation type). Loaded into a Python dict once per iteration and written back at the end of it |
 | `Mutation` | Node | `iter`, `kind`, `reason`, `question_id` | Provenance for every change, and the source of the before/after diff |
 
-Edge score during traversal is `RelType.weight` times `REL.confidence`.
+Edge score during traversal is `RelType.weight` times `REL.confidence`, computed in Python.
+
+Every node has a non-negative integer `id` from a persisted counter. Every property is always written with a default value, because `IS NULL` is not available.
+
+## Seed schema
+
+The shallow ingest extracts 8 relations. The rest are held back so that schema growth has room to show. The counts are evidence triples in the 2WikiMultihopQA dev split.
+
+- **Included:** `director` (7,592), `date of birth` (4,976), `publication date` (2,184), `country of citizenship` (2,146), `place of birth` (1,648), `country of origin` (754), `performer` (426), `composer` (262). Together they are 64% of all evidence triples.
+- **Held back:** `father` (3,203), `date of death` (2,551), `spouse` (1,198), `mother` (1,156), `place of death` (1,015), `country` (657), `educated at` (249), `place of burial`, `employer`, `child`, `sibling`.
+
+Share of questions whose evidence relations are all in the seed schema, so iteration 0 can in principle answer them:
+
+| Question type | Full dev split | 150 feedback questions |
+| --- | --- | --- |
+| inference | 0% | 0% |
+| compositional | 28% | 21% |
+| bridge_comparison | 70% | 70% |
+| comparison | 78% | 72% |
+
+Inference and compositional questions have the most room to improve. Comparison and bridge_comparison start mostly covered.
 
 ## Query path
 
 A question is answered by a weighted beam traversal of at most three hops, one Cypher call per hop.
 
 1. An LLM call returns the seed entities, the question type and the relation chain it expects, for example `director` then `spouse`.
-2. Seeds resolve to `Entity` nodes through the name and alias index.
-3. The beam expands one hop per Cypher call, ordered by `RelType.weight` times `REL.confidence`, keeping the top k paths.
+2. Seeds resolve to entity ids through the Python name and alias dict.
+3. The beam expands one hop per Cypher call. Each call fetches candidate edges with `ORDER BY r.confidence DESC LIMIT 200`. Python then scores them as `RelType.weight` times `REL.confidence` and keeps the top k paths.
 4. If the beam dead-ends, the per-query extraction budget may be spent (see Extraction budget), then the hop is retried.
 5. The LLM answers from the winning paths, the literal attributes on their entities, and the source chunks of their edges.
 6. The answer, the paths used and the chunks read are logged for the classifier.
 
-One hop per call avoids relying on variable-length path support, which is unverified in HydraDB.
+One hop per call keeps each query simple. Cypher cannot order by a computed expression, so the weighted ordering happens in Python.
 
 ## Learning loop
 
@@ -68,7 +90,7 @@ Each iteration answers the 150 feedback questions, classifies every failure by h
 
 | Failure | What to check | Repair |
 | --- | --- | --- |
-| Entity gap | A starting entity cannot be resolved to a node | Add the alias to the existing entity |
+| Entity gap | A starting entity cannot be resolved to a node | Add the alias to the existing entity, in the Python dict and in the graph |
 | Extraction gap | A gold evidence triple has no matching edge or attribute in the graph | Add the relation type to the schema, raise its `blame_count`, extract it from the seed's chunks |
 | Ranking gap | The evidence is in the graph but was not on the retrieved paths | Raise the weight of relation types on the gold chain, decay those on the chosen path |
 | Reasoning gap | The evidence was retrieved and the answer is still wrong | Log only. No graph change |
@@ -88,9 +110,9 @@ The loop then re-scores the held-out set and records one point on the curve. Run
 Every query may spend at most two targeted extraction calls, and the learned policy decides which relation types to spend them on.
 
 - **Trigger:** the beam dead-ends at an entity. No labels are involved, so this is legal on held-out questions.
-- **Policy:** for the question's type, pick the relation types with the highest `blame_count` that have not yet been extracted from the seed entity's chunks.
+- **Policy:** for the question's type, pick the relation types with the highest `blame_count` that have no `EXTRACTED` edge from the seed entity's chunks.
 - **Cost unit:** one extraction call on one chunk for one relation type. Cost per call is roughly constant, so ranking by blame is enough. No improvement-per-cost estimate.
-- **Why per query, not per iteration:** a global budget of 20 chunks per iteration covers about 100 of 2,500 chunks over five iterations. Held-out chunks would almost never be chosen and the curve would stay flat.
+- **Why per query, not per iteration:** a global budget of 20 chunks per iteration covers about 100 of 1,748 chunks over five iterations. Held-out chunks would almost never be chosen and the curve would stay flat.
 - **Control:** the same budget spent on randomly chosen relation types. Learned against random at equal cost is the comparison that shows the learning matters.
 
 ## Evaluation
@@ -105,7 +127,7 @@ The headline chart is held-out accuracy over five iterations for the learned pol
 | Vector only | Top-k chunk retrieval, no graph | Whether the task needs the graph |
 
 - **Metrics:** exact match and F1 on the entity-disjoint held-out set, plus a breakdown by question type and hop count.
-- **Noise:** about 100 held-out questions gives a noisy curve. Run three seeds and show the band.
+- **Noise:** 87 held-out questions gives a noisy curve. Run three seeds and show the band.
 - **Ablations:** ingestion only, reweighting only, both.
 - **Cost:** cumulative extraction calls per iteration, reported next to accuracy.
 - **Load test:** 50 concurrent queries while a repair batch is writing. Report p50 and p95 latency.
@@ -133,13 +155,13 @@ The iteration-0 number must exist by hour 9. Everything after that is the loop.
 | --- | --- | --- |
 | 0–2 | HydraDB in Docker. Test `MERGE`, `SET` on relationship properties, `UNWIND`, `ORDER BY` with `LIMIT`. Sample the data | Smoke-test script passes |
 | 2–6 | Shallow ingest (chunks, entities, literals, a small seed schema) and the query pipeline | A question returns an answer with its path |
-| 6–9 | Eval harness, entity-disjoint split, vector-only and static-graph baselines | Iteration-0 numbers saved to JSON |
+| 6–9 | Eval harness, entity-disjoint split, vector-only and static-graph baselines | Iteration-0 numbers saved to JSON. Due 15 Nov 12:00 IST |
 | 9–14 | Evidence-coverage classifier, schema growth, budgeted targeted extraction | Failures are labelled and repairs write `Mutation` nodes |
 | 14–18 | Reweighting and the random-policy control. Run five iterations | The curve exists |
 | 18–21 | Ablations, three seeds, load test | Numbers for the README |
 | 21–25 | Streamlit demo: curve, path viewer, mutation log | A two-minute walkthrough works |
 | 25–28 | Pitch, README, demo video | Submission draft complete |
-| 28–30 | Buffer and submit | Submitted |
+| 28–30 | Buffer and submit. The buffer ends 16 Nov 07:00 IST | Submitted |
 
 - **Cache every LLM call** on disk by prompt hash, so reruns are free and reproducible.
 - **Cut order if behind:** alias repair, then the second demo corpus, then extra seeds, then UI polish.
@@ -159,6 +181,15 @@ The one-line pitch: start with a cheap graph, and it deepens only where your use
 
 Pitch what was measured. An incident-debugging story on a Wikipedia benchmark would not hold up under questions.
 
+## Smoke test findings (v0.4.0)
+
+The smoke test (`scripts/smoke_test.py`) against HydraDB v0.4.0 found four constraints. The design above follows them.
+
+1. **No computed ordering.** `RETURN` takes only `binding.property` or `count(*)`. Weighted scoring happens in Python after a `LIMIT 200` fetch.
+2. **Integer ids only.** Node ids are non-negative integers. Name and alias lookup lives in a Python dict.
+3. **Writes only through `UNWIND`.** A standalone `MERGE ... SET` is rejected. All writes go through one helper, `write(query, rows)`, using `UNWIND ... MERGE/CREATE`. No other code builds write Cypher.
+4. **No `IN`, `CONTAINS` or `IS NULL` in `WHERE`.** Extraction state is stored as `EXTRACTED` edges and filtered by equality. Every property is written with a default value.
+
 ## Risks and first-hour checks
 
 The largest risk is that vector-only retrieval beats the graph overall, because flat RAG is strong on these benchmarks.
@@ -166,7 +197,7 @@ The largest risk is that vector-only retrieval beats the graph overall, because 
 | Risk | Mitigation |
 | --- | --- |
 | Vector baseline wins overall | Lead with the breakdown by question type and hop count, and with learned against random. Report the overall result plainly |
-| HydraDB lacks a Cypher feature we assumed | The [Railway template](https://railway.com/deploy/hydradb-graph-database-on-object-storage--hydradb-v03-graph-database-on-object-sto.md) notes it is not full Neo4j. Test in hour one and keep traversal to one hop per call |
+| HydraDB lacks a Cypher feature we assumed | Checked by `scripts/smoke_test.py` on 0.4.0. Constraints are listed in Smoke test findings. Re-run the smoke test if the image changes |
 | Dataset format differs from what we assumed | Confirm evidence triples and question-type labels before writing the classifier |
 | Curve is flat | Check that the budget is per query and that iteration 0 is shallow enough to leave room |
 | Curve is noisy | Three seeds, show the band |
@@ -175,8 +206,8 @@ The largest risk is that vector-only retrieval beats the graph overall, because 
 
 First-hour checklist:
 
-- [ ] HydraDB runs locally from the Docker image ([README](https://raw.githubusercontent.com/hydra-db/hydradb/main/README.md))
-- [ ] The Neo4j Python driver connects over Bolt
-- [ ] `MERGE`, `SET` on a relationship property, `UNWIND` batch writes and `ORDER BY` with `LIMIT` all work
-- [ ] 2WikiMultihopQA sample loaded, evidence triples and question types present
-- [ ] Submission deadline and required deliverables confirmed with the organisers
+- [x] HydraDB v0.4.0 runs locally from the Docker image ([README](https://raw.githubusercontent.com/hydra-db/hydradb/main/README.md))
+- [x] The Neo4j Python driver connects over Bolt
+- [x] `MERGE`, `SET` on a relationship property, `UNWIND` batch writes and `ORDER BY` with `LIMIT` all work
+- [x] 2WikiMultihopQA sample loaded, evidence triples and question types present
+- [x] Submission deadline and required deliverables confirmed with the organisers (due 16 Nov 2026, 09:00 IST)

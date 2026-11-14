@@ -1,0 +1,43 @@
+estimate (this run, normal calls): 1728 chunks, ~2,052,843 input + ~307,498 output tokens, ~$3.59
+estimate (all remaining, normal calls): 1728 chunks, ~2,052,843 input + ~307,498 output tokens, ~$3.59
+estimate (all remaining, Batches API): 1728 chunks, ~2,052,843 input + ~307,498 output tokens, ~$1.80
+already ingested: 20 / 1748
+  batch msgbatch_01CqAuZfik2o18nkEUyQw8n1: 1728 requests submitted, waiting...
+  batch result: {'status': 'ended', 'succeeded': 1728, 'failed': 0, 'cost': 1.800532499999997, 'input_tokens': 2056390, 'output_tokens': 308935}
+  50/1728 chunks, 103 edges, 57 literals
+  100/1728 chunks, 187 edges, 101 literals
+  150/1728 chunks, 271 edges, 138 literals
+  200/1728 chunks, 392 edges, 195 literals
+  250/1728 chunks, 479 edges, 239 literals
+  300/1728 chunks, 554 edges, 283 literals
+  350/1728 chunks, 624 edges, 321 literals
+  400/1728 chunks, 713 edges, 368 literals
+  450/1728 chunks, 796 edges, 409 literals
+  500/1728 chunks, 901 edges, 457 literals
+  550/1728 chunks, 1003 edges, 501 literals
+  600/1728 chunks, 1107 edges, 544 literals
+  650/1728 chunks, 1199 edges, 588 literals
+  700/1728 chunks, 1277 edges, 638 literals
+  750/1728 chunks, 1372 edges, 677 literals
+  800/1728 chunks, 1470 edges, 729 literals
+  850/1728 chunks, 1555 edges, 773 literals
+  900/1728 chunks, 1637 edges, 815 literals
+  950/1728 chunks, 1732 edges, 852 literals
+  1000/1728 chunks, 1810 edges, 891 literals
+  1050/1728 chunks, 1907 edges, 934 literals
+  1100/1728 chunks, 2002 edges, 973 literals
+  1150/1728 chunks, 2100 edges, 1017 literals
+  1200/1728 chunks, 2174 edges, 1058 literals
+  1250/1728 chunks, 2261 edges, 1102 literals
+  1300/1728 chunks, 2332 edges, 1140 literals
+  1350/1728 chunks, 2409 edges, 1185 literals
+  1400/1728 chunks, 2504 edges, 1223 literals
+  1450/1728 chunks, 2583 edges, 1263 literals
+  1500/1728 chunks, 2659 edges, 1296 literals
+  1550/1728 chunks, 2757 edges, 1350 literals
+  1600/1728 chunks, 2832 edges, 1387 literals
+  1650/1728 chunks, 2908 edges, 1431 literals
+  1700/1728 chunks, 3001 edges, 1471 literals
+  1728/1728 chunks, 3063 edges, 1493 literals
+[llm:ingest] fresh_calls=1728 cache_hits=1728 in=2056390 out=308935 cost=$1.8005 retries=0 truncated=22
+[spend] total $1.9265 of $9.00 (+$0.0000 pending) | ingest $1.9265 / $2.50 | smoke $0.0000 / $1.00 | learning $0.0000 / $4.50 | reserve $1.00 left of $1.00

@@ -1,0 +1,2166 @@
+{
+ "run_params": {
+  "beam_k": 5,
+  "max_hops": 3,
+  "fetch_limit": 200,
+  "chain_boost": 3.0,
+  "answer_max_chunks": 5,
+  "answer_max_tokens": 100,
+  "extract_model": "claude-haiku-4-5-20251001",
+  "answer_model": "claude-haiku-4-5-20251001",
+  "answer_prompt_sha": "337599400a9e"
+ },
+ "traces": [
+  {
+   "question": "Which film whose director is younger, Lanton Mills or Tomorrow Never Dies?",
+   "plan": {
+    "seeds": [
+     "Lanton Mills",
+     "Tomorrow Never Dies"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of birth"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Lanton Mills",
+     "id": 3701
+    },
+    {
+     "name": "Tomorrow Never Dies",
+     "id": 4736
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 3701,
+       "name": "Lanton Mills"
+      },
+      {
+       "id": 3971,
+       "name": "Terrence Malick"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 3699
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 3969
+      }
+     ],
+     "score": 2.97
+    },
+    {
+     "nodes": [
+      {
+       "id": 4736,
+       "name": "Tomorrow Never Dies"
+      },
+      {
+       "id": 2416,
+       "name": "Roger Spottiswoode"
+      },
+      {
+       "id": 13990,
+       "name": "Ottawa, Ontario, Canada"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 2414
+      },
+      {
+       "type": "place of birth",
+       "confidence": 0.99,
+       "chunk": 2414
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 4736,
+       "name": "Tomorrow Never Dies"
+      },
+      {
+       "id": 2416,
+       "name": "Roger Spottiswoode"
+      },
+      {
+       "id": 13990,
+       "name": "Ottawa, Ontario, Canada"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 4734
+      },
+      {
+       "type": "place of birth",
+       "confidence": 0.99,
+       "chunk": 2414
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 4736,
+       "name": "Tomorrow Never Dies"
+      },
+      {
+       "id": 2416,
+       "name": "Roger Spottiswoode"
+      },
+      {
+       "id": 7040,
+       "name": "Canada"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 2414
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.9,
+       "chunk": 2414
+      }
+     ],
+     "score": 2.565
+    },
+    {
+     "nodes": [
+      {
+       "id": 4736,
+       "name": "Tomorrow Never Dies"
+      },
+      {
+       "id": 2416,
+       "name": "Roger Spottiswoode"
+      },
+      {
+       "id": 7040,
+       "name": "Canada"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 4734
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.9,
+       "chunk": 2414
+      }
+     ],
+     "score": 2.565
+    },
+    {
+     "nodes": [
+      {
+       "id": 4736,
+       "name": "Tomorrow Never Dies"
+      },
+      {
+       "id": 2416,
+       "name": "Roger Spottiswoode"
+      },
+      {
+       "id": 7894,
+       "name": "United Kingdom"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 2414
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.9,
+       "chunk": 2414
+      }
+     ],
+     "score": 2.565
+    },
+    {
+     "nodes": [
+      {
+       "id": 3701,
+       "name": "Lanton Mills"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 1.0,
+       "chunk": 3699
+      }
+     ],
+     "score": 1.0
+    },
+    {
+     "nodes": [
+      {
+       "id": 4736,
+       "name": "Tomorrow Never Dies"
+      },
+      {
+       "id": 7894,
+       "name": "United Kingdom"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.75,
+       "chunk": 4734
+      }
+     ],
+     "score": 0.75
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 5364,
+     "entity": "United States",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 7894,
+     "entity": "United Kingdom",
+     "expected_relation": "date of birth"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 3699,
+     "title": "Lanton Mills"
+    },
+    {
+     "id": 3969,
+     "title": "Terrence Malick"
+    },
+    {
+     "id": 2414,
+     "title": "Roger Spottiswoode"
+    },
+    {
+     "id": 4734,
+     "title": "Tomorrow Never Dies"
+    }
+   ],
+   "attributes": {
+    "2416": {
+     "date_of_birth": "5 January 1945"
+    },
+    "3701": {
+     "publication_date": "1974"
+    },
+    "3971": {
+     "date_of_birth": "November 30, 1943"
+    },
+    "4736": {
+     "publication_date": "1997"
+    }
+   },
+   "answer": "Lanton Mills",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Tomorrow Never Dies",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director who died first, Deported Women Of The Ss Special Section or Custodio De Señoras?",
+   "plan": {
+    "seeds": [
+     "Deported Women Of The Ss Special Section",
+     "Custodio De Señoras"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of death"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Deported Women of the SS Special Section",
+     "id": 4517
+    },
+    {
+     "name": "Custodio de señoras",
+     "id": 112
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 112,
+       "name": "Custodio de señoras"
+      },
+      {
+       "id": 3509,
+       "name": "Hugo Sofovich"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 110
+      }
+     ],
+     "score": 2.85
+    },
+    {
+     "nodes": [
+      {
+       "id": 4517,
+       "name": "Deported Women of the SS Special Section"
+      },
+      {
+       "id": 4052,
+       "name": "Rino Di Silvestro"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 4515
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.95,
+       "chunk": 4050
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 112,
+       "name": "Custodio de señoras"
+      },
+      {
+       "id": 5672,
+       "name": "Argentina"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 110
+      }
+     ],
+     "score": 0.95
+    },
+    {
+     "nodes": [
+      {
+       "id": 4517,
+       "name": "Deported Women of the SS Special Section"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 4515
+      }
+     ],
+     "score": 0.95
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 5445,
+     "entity": "Italy",
+     "expected_relation": "date of death"
+    },
+    {
+     "hop": 1,
+     "entity_id": 3509,
+     "entity": "Hugo Sofovich",
+     "expected_relation": "date of death"
+    },
+    {
+     "hop": 1,
+     "entity_id": 5672,
+     "entity": "Argentina",
+     "expected_relation": "date of death"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 110,
+     "title": "Custodio de señoras"
+    },
+    {
+     "id": 4515,
+     "title": "Deported Women of the SS Special Section"
+    },
+    {
+     "id": 4050,
+     "title": "Rino Di Silvestro"
+    }
+   ],
+   "attributes": {
+    "112": {
+     "publication_date": "1979"
+    },
+    "4052": {
+     "date_of_birth": "30 January 1932"
+    },
+    "4517": {
+     "publication_date": "1976"
+    }
+   },
+   "answer": "Deported Women of the SS Special Section",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Custodio De Señoras",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director born first, Condannato A Nozze or All My Lenins?",
+   "plan": {
+    "seeds": [
+     "Condannato A Nozze",
+     "All My Lenins"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of birth"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Condannato a nozze",
+     "id": 2928
+    },
+    {
+     "name": "All My Lenins",
+     "id": 448
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 2928,
+       "name": "Condannato a nozze"
+      },
+      {
+       "id": 754,
+       "name": "Giuseppe Piccioni"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 2926
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 1.0,
+       "chunk": 752
+      }
+     ],
+     "score": 3.0
+    },
+    {
+     "nodes": [
+      {
+       "id": 448,
+       "name": "All My Lenins"
+      },
+      {
+       "id": 4781,
+       "name": "Hardi Volmer"
+      },
+      {
+       "id": 22406,
+       "name": "Pärnu"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 446
+      },
+      {
+       "type": "place of birth",
+       "confidence": 0.99,
+       "chunk": 4779
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 448,
+       "name": "All My Lenins"
+      },
+      {
+       "id": 4781,
+       "name": "Hardi Volmer"
+      },
+      {
+       "id": 22408,
+       "name": "Estonia"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 446
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 4779
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 448,
+       "name": "All My Lenins"
+      },
+      {
+       "id": 4781,
+       "name": "Hardi Volmer"
+      },
+      {
+       "id": 22410,
+       "name": "Singer Vinger"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 446
+      },
+      {
+       "type": "performer",
+       "confidence": 0.95,
+       "chunk": 4779
+      }
+     ],
+     "score": 2.7075
+    },
+    {
+     "nodes": [
+      {
+       "id": 2928,
+       "name": "Condannato a nozze"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 1.0,
+       "chunk": 2926
+      }
+     ],
+     "score": 1.0
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 5445,
+     "entity": "Italy",
+     "expected_relation": "date of birth"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 2926,
+     "title": "Condannato a nozze"
+    },
+    {
+     "id": 752,
+     "title": "Giuseppe Piccioni"
+    },
+    {
+     "id": 446,
+     "title": "All My Lenins"
+    },
+    {
+     "id": 4779,
+     "title": "Hardi Volmer"
+    }
+   ],
+   "attributes": {
+    "448": {
+     "publication_date": "1997"
+    },
+    "754": {
+     "date_of_birth": "2 July 1953"
+    },
+    "2928": {
+     "publication_date": "1993"
+    },
+    "4781": {
+     "date_of_birth": "8 November 1957"
+    }
+   },
+   "answer": "Condannato A Nozze",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Condannato A Nozze",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director who died earlier, The Plot To Assassinate Hitler or Les Amants Du Pont Saint-Jean?",
+   "plan": {
+    "seeds": [
+     "The Plot To Assassinate Hitler",
+     "Les Amants Du Pont Saint-Jean"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of death"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "The Plot to Assassinate Hitler",
+     "id": 1099
+    },
+    {
+     "name": "Les Amants du pont Saint-Jean",
+     "id": 2395
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 1099,
+       "name": "The Plot to Assassinate Hitler"
+      },
+      {
+       "id": 1246,
+       "name": "Falk Harnack"
+      },
+      {
+       "id": 7823,
+       "name": "Germany"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 1097
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 1244
+      }
+     ],
+     "score": 2.97
+    },
+    {
+     "nodes": [
+      {
+       "id": 2395,
+       "name": "Les Amants du pont Saint-Jean"
+      },
+      {
+       "id": 4337,
+       "name": "Henri Decoin"
+      },
+      {
+       "id": 6091,
+       "name": "France"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 2393
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 4335
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 1099,
+       "name": "The Plot to Assassinate Hitler"
+      },
+      {
+       "id": 7823,
+       "name": "Germany"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 1.0,
+       "chunk": 1097
+      }
+     ],
+     "score": 1.0
+    },
+    {
+     "nodes": [
+      {
+       "id": 2395,
+       "name": "Les Amants du pont Saint-Jean"
+      },
+      {
+       "id": 6091,
+       "name": "France"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 2393
+      }
+     ],
+     "score": 0.95
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 7823,
+     "entity": "Germany",
+     "expected_relation": "date of death"
+    },
+    {
+     "hop": 1,
+     "entity_id": 6091,
+     "entity": "France",
+     "expected_relation": "date of death"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 1097,
+     "title": "The Plot to Assassinate Hitler"
+    },
+    {
+     "id": 1244,
+     "title": "Falk Harnack"
+    },
+    {
+     "id": 2393,
+     "title": "Les Amants du pont Saint-Jean"
+    },
+    {
+     "id": 4335,
+     "title": "Henri Decoin"
+    }
+   ],
+   "attributes": {
+    "1099": {
+     "publication_date": "1955"
+    },
+    "1246": {
+     "date_of_birth": "2 March 1913"
+    },
+    "2395": {
+     "publication_date": "1947"
+    },
+    "4337": {
+     "date_of_birth": "18 March 1890"
+    }
+   },
+   "answer": "Les Amants du pont Saint-Jean",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Les Amants Du Pont Saint-Jean",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director died first, Father And The Boys or Valerie Inside Outside?",
+   "plan": {
+    "seeds": [
+     "Father And The Boys",
+     "Valerie Inside Outside"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of death"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Father and the Boys",
+     "id": 1489
+    },
+    {
+     "name": "Valerie Inside Outside",
+     "id": 3800
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 3800,
+       "name": "Valerie Inside Outside"
+      },
+      {
+       "id": 3186,
+       "name": "Brunello Rondi"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 3798
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 3184
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 1489,
+       "name": "Father and the Boys"
+      },
+      {
+       "id": 10537,
+       "name": "Joe De Grasse"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 1487
+      }
+     ],
+     "score": 2.85
+    },
+    {
+     "nodes": [
+      {
+       "id": 3800,
+       "name": "Valerie Inside Outside"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.99,
+       "chunk": 3798
+      }
+     ],
+     "score": 0.99
+    },
+    {
+     "nodes": [
+      {
+       "id": 1489,
+       "name": "Father and the Boys"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 1487
+      }
+     ],
+     "score": 0.95
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 10537,
+     "entity": "Joe De Grasse",
+     "expected_relation": "date of death"
+    },
+    {
+     "hop": 1,
+     "entity_id": 5364,
+     "entity": "United States",
+     "expected_relation": "date of death"
+    },
+    {
+     "hop": 1,
+     "entity_id": 5445,
+     "entity": "Italy",
+     "expected_relation": "date of death"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 3798,
+     "title": "Valerie Inside Outside"
+    },
+    {
+     "id": 3184,
+     "title": "Brunello Rondi"
+    },
+    {
+     "id": 1487,
+     "title": "Father and the Boys"
+    }
+   ],
+   "attributes": {
+    "1489": {
+     "publication_date": "1915"
+    },
+    "3186": {
+     "date_of_birth": "26 November 1924"
+    },
+    "3800": {
+     "publication_date": "1972"
+    }
+   },
+   "answer": "Joe De Grasse",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Father And The Boys",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Do both films, The Wild Frontier (Film) and The Sundowners (1960 Film), have the directors who are from the same country?",
+   "plan": {
+    "seeds": [
+     "The Wild Frontier (Film)",
+     "The Sundowners (1960 Film)"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "country of citizenship"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "The Wild Frontier (film)",
+     "id": 5276
+    },
+    {
+     "name": "The Sundowners (1960 film)",
+     "id": 5213
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 5213,
+       "name": "The Sundowners (1960 film)"
+      },
+      {
+       "id": 304,
+       "name": "Fred Zinnemann"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 5211
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 302
+      }
+     ],
+     "score": 8.8209
+    },
+    {
+     "nodes": [
+      {
+       "id": 5276,
+       "name": "The Wild Frontier (film)"
+      },
+      {
+       "id": 3300,
+       "name": "Philip Ford (film director)"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 5274
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.95,
+       "chunk": 3298
+      }
+     ],
+     "score": 8.4645
+    },
+    {
+     "nodes": [
+      {
+       "id": 5276,
+       "name": "The Wild Frontier (film)"
+      },
+      {
+       "id": 3300,
+       "name": "Philip Ford (film director)"
+      },
+      {
+       "id": 17193,
+       "name": "Portland, Maine"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 5274
+      },
+      {
+       "type": "place of birth",
+       "confidence": 0.99,
+       "chunk": 3298
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 5213,
+       "name": "The Sundowners (1960 film)"
+      },
+      {
+       "id": 304,
+       "name": "Fred Zinnemann"
+      },
+      {
+       "id": 8187,
+       "name": "Austria"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 5211
+      },
+      {
+       "type": "place of birth",
+       "confidence": 0.95,
+       "chunk": 302
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 5276,
+       "name": "The Wild Frontier (film)"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.99,
+       "chunk": 5274
+      }
+     ],
+     "score": 0.99
+    },
+    {
+     "nodes": [
+      {
+       "id": 5213,
+       "name": "The Sundowners (1960 film)"
+      },
+      {
+       "id": 5612,
+       "name": "Australia"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.85,
+       "chunk": 5211
+      }
+     ],
+     "score": 0.85
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 5364,
+     "entity": "United States",
+     "expected_relation": "country of citizenship"
+    },
+    {
+     "hop": 1,
+     "entity_id": 5612,
+     "entity": "Australia",
+     "expected_relation": "country of citizenship"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 5211,
+     "title": "The Sundowners (1960 film)"
+    },
+    {
+     "id": 302,
+     "title": "Fred Zinnemann"
+    },
+    {
+     "id": 5274,
+     "title": "The Wild Frontier (film)"
+    },
+    {
+     "id": 3298,
+     "title": "Philip Ford (film director)"
+    }
+   ],
+   "attributes": {
+    "304": {
+     "date_of_birth": "April 29, 1907"
+    },
+    "3300": {
+     "date_of_birth": "October 16, 1900"
+    },
+    "5213": {
+     "publication_date": "1960"
+    },
+    "5276": {
+     "publication_date": "October 1, 1947"
+    }
+   },
+   "answer": "Yes",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "yes",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director who was born first, Aatma Bandhuvu or Waiting For The Clouds?",
+   "plan": {
+    "seeds": [
+     "Aatma Bandhuvu",
+     "Waiting For The Clouds"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of birth"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Aatma Bandhuvu",
+     "id": 2571
+    },
+    {
+     "name": "Waiting for the Clouds",
+     "id": 4496
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 2571,
+       "name": "Aatma Bandhuvu"
+      },
+      {
+       "id": 1087,
+       "name": "P. S. Ramakrishna Rao"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 2569
+      }
+     ],
+     "score": 2.85
+    },
+    {
+     "nodes": [
+      {
+       "id": 4496,
+       "name": "Waiting for the Clouds"
+      },
+      {
+       "id": 3195,
+       "name": "Yeşim Ustaoğlu"
+      },
+      {
+       "id": 16794,
+       "name": "Turkey"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 4494
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.95,
+       "chunk": 3193
+      }
+     ],
+     "score": 2.8215
+    },
+    {
+     "nodes": [
+      {
+       "id": 2571,
+       "name": "Aatma Bandhuvu"
+      },
+      {
+       "id": 14568,
+       "name": "K. V. Mahadevan"
+      }
+     ],
+     "edges": [
+      {
+       "type": "composer",
+       "confidence": 0.95,
+       "chunk": 2569
+      }
+     ],
+     "score": 0.95
+    },
+    {
+     "nodes": [
+      {
+       "id": 4496,
+       "name": "Waiting for the Clouds"
+      },
+      {
+       "id": 16794,
+       "name": "Turkey"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 4494
+      }
+     ],
+     "score": 0.95
+    },
+    {
+     "nodes": [
+      {
+       "id": 2571,
+       "name": "Aatma Bandhuvu"
+      },
+      {
+       "id": 11240,
+       "name": "Telugu"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.85,
+       "chunk": 2569
+      }
+     ],
+     "score": 0.85
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 1087,
+     "entity": "P. S. Ramakrishna Rao",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 14568,
+     "entity": "K. V. Mahadevan",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 11240,
+     "entity": "Telugu",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 16794,
+     "entity": "Turkey",
+     "expected_relation": "date of birth"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 2569,
+     "title": "Aatma Bandhuvu"
+    },
+    {
+     "id": 4494,
+     "title": "Waiting for the Clouds"
+    },
+    {
+     "id": 3193,
+     "title": "Yeşim Ustaoğlu"
+    }
+   ],
+   "attributes": {
+    "1087": {
+     "date_of_birth": "12 October 1918"
+    },
+    "2571": {
+     "publication_date": "1962"
+    },
+    "3195": {
+     "date_of_birth": "18 November 1960"
+    },
+    "4496": {
+     "publication_date": "2003"
+    }
+   },
+   "answer": "Waiting For The Clouds",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Aatma Bandhuvu",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director born later, Eye Of The Eagle 2: Inside The Enemy or Nobody'S Darling?",
+   "plan": {
+    "seeds": [
+     "Eye Of The Eagle 2: Inside The Enemy",
+     "Nobody's Darling"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of birth"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Eye of the Eagle 2: Inside the Enemy",
+     "id": 1453
+    },
+    {
+     "name": "Nobody's Darling",
+     "id": 1195
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 1453,
+       "name": "Eye of the Eagle 2: Inside the Enemy"
+      },
+      {
+       "id": 1009,
+       "name": "Carl Franklin"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 1451
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 1.0,
+       "chunk": 1007
+      }
+     ],
+     "score": 3.0
+    },
+    {
+     "nodes": [
+      {
+       "id": 1195,
+       "name": "Nobody's Darling"
+      },
+      {
+       "id": 595,
+       "name": "Anthony Mann"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 1193
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 593
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 1195,
+       "name": "Nobody's Darling"
+      },
+      {
+       "id": 595,
+       "name": "Anthony Mann"
+      },
+      {
+       "id": 7321,
+       "name": "Winchester'73"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 1193
+      },
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 593
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 1195,
+       "name": "Nobody's Darling"
+      },
+      {
+       "id": 595,
+       "name": "Anthony Mann"
+      },
+      {
+       "id": 7322,
+       "name": "El Cid"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 1193
+      },
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 593
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 1195,
+       "name": "Nobody's Darling"
+      },
+      {
+       "id": 595,
+       "name": "Anthony Mann"
+      },
+      {
+       "id": 7325,
+       "name": "Cimarron"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 1193
+      },
+      {
+       "type": "director",
+       "confidence": 0.99,
+       "chunk": 593
+      }
+     ],
+     "score": 2.9403
+    },
+    {
+     "nodes": [
+      {
+       "id": 1195,
+       "name": "Nobody's Darling"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.99,
+       "chunk": 1193
+      }
+     ],
+     "score": 0.99
+    },
+    {
+     "nodes": [
+      {
+       "id": 1453,
+       "name": "Eye of the Eagle 2: Inside the Enemy"
+      },
+      {
+       "id": 8088,
+       "name": "Philippines"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.7,
+       "chunk": 1451
+      }
+     ],
+     "score": 0.7
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 8088,
+     "entity": "Philippines",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 5364,
+     "entity": "United States",
+     "expected_relation": "date of birth"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 1451,
+     "title": "Eye of the Eagle 2: Inside the Enemy"
+    },
+    {
+     "id": 1007,
+     "title": "Carl Franklin"
+    },
+    {
+     "id": 1193,
+     "title": "Nobody's Darling"
+    },
+    {
+     "id": 593,
+     "title": "Anthony Mann"
+    }
+   ],
+   "attributes": {
+    "595": {
+     "date_of_birth": "June 30, 1906"
+    },
+    "1009": {
+     "date_of_birth": "April 11, 1949"
+    },
+    "1195": {
+     "publication_date": "August 27, 1943"
+    },
+    "1453": {
+     "publication_date": "1989"
+    },
+    "7321": {
+     "publication_date": "1950"
+    },
+    "7322": {
+     "publication_date": "1961"
+    },
+    "7325": {
+     "publication_date": "1960"
+    }
+   },
+   "answer": "Eye of the Eagle 2: Inside the Enemy",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Eye Of The Eagle 2: Inside The Enemy",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director who died earlier, Australia After Dark or Rainbow Over Broadway?",
+   "plan": {
+    "seeds": [
+     "Australia After Dark",
+     "Rainbow Over Broadway"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of death"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "Australia After Dark",
+     "id": 4181
+    },
+    {
+     "name": "Rainbow Over Broadway",
+     "id": 3827
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 3827,
+       "name": "Rainbow Over Broadway"
+      },
+      {
+       "id": 2422,
+       "name": "Richard Thorpe"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 3825
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 2420
+      }
+     ],
+     "score": 2.97
+    },
+    {
+     "nodes": [
+      {
+       "id": 4181,
+       "name": "Australia After Dark"
+      },
+      {
+       "id": 2562,
+       "name": "John D. Lamond"
+      },
+      {
+       "id": 5612,
+       "name": "Australia"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 4179
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.95,
+       "chunk": 2560
+      }
+     ],
+     "score": 2.85
+    },
+    {
+     "nodes": [
+      {
+       "id": 3827,
+       "name": "Rainbow Over Broadway"
+      },
+      {
+       "id": 5364,
+       "name": "United States"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 1.0,
+       "chunk": 3825
+      }
+     ],
+     "score": 1.0
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 5364,
+     "entity": "United States",
+     "expected_relation": "date of death"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 3825,
+     "title": "Rainbow Over Broadway"
+    },
+    {
+     "id": 2420,
+     "title": "Richard Thorpe"
+    },
+    {
+     "id": 4179,
+     "title": "Australia After Dark"
+    },
+    {
+     "id": 2560,
+     "title": "John D. Lamond"
+    }
+   ],
+   "attributes": {
+    "2422": {
+     "date_of_birth": "February 24, 1896"
+    },
+    "2562": {
+     "date_of_birth": "1947"
+    },
+    "3827": {
+     "publication_date": "1933"
+    },
+    "4181": {
+     "publication_date": "1975"
+    }
+   },
+   "answer": "Australia After Dark",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "Rainbow Over Broadway",
+   "type": "bridge_comparison"
+  },
+  {
+   "question": "Which film has the director who is older than the other, The Nurse In The Military Madhouse or Tuset Street? ",
+   "plan": {
+    "seeds": [
+     "The Nurse In The Military Madhouse",
+     "Tuset Street"
+    ],
+    "question_type": "bridge_comparison",
+    "relation_chain": [
+     "director",
+     "date of birth"
+    ]
+   },
+   "seeds": [
+    {
+     "name": "The Nurse in the Military Madhouse",
+     "id": 88
+    },
+    {
+     "name": "Tuset Street",
+     "id": 5111
+    }
+   ],
+   "unresolved_seeds": [],
+   "paths": [
+    {
+     "nodes": [
+      {
+       "id": 88,
+       "name": "The Nurse in the Military Madhouse"
+      },
+      {
+       "id": 2865,
+       "name": "Mariano Laurenti"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 1.0,
+       "chunk": 86
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.99,
+       "chunk": 2863
+      }
+     ],
+     "score": 2.97
+    },
+    {
+     "nodes": [
+      {
+       "id": 5111,
+       "name": "Tuset Street"
+      },
+      {
+       "id": 23594,
+       "name": "Luis Marquina"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 5109
+      }
+     ],
+     "score": 2.85
+    },
+    {
+     "nodes": [
+      {
+       "id": 5111,
+       "name": "Tuset Street"
+      },
+      {
+       "id": 3974,
+       "name": "Jorge Grau"
+      },
+      {
+       "id": 6848,
+       "name": "Spain"
+      }
+     ],
+     "edges": [
+      {
+       "type": "director",
+       "confidence": 0.95,
+       "chunk": 5109
+      },
+      {
+       "type": "country of citizenship",
+       "confidence": 0.95,
+       "chunk": 3972
+      }
+     ],
+     "score": 2.7075
+    },
+    {
+     "nodes": [
+      {
+       "id": 88,
+       "name": "The Nurse in the Military Madhouse"
+      },
+      {
+       "id": 5445,
+       "name": "Italy"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 86
+      }
+     ],
+     "score": 0.95
+    },
+    {
+     "nodes": [
+      {
+       "id": 5111,
+       "name": "Tuset Street"
+      },
+      {
+       "id": 6848,
+       "name": "Spain"
+      }
+     ],
+     "edges": [
+      {
+       "type": "country of origin",
+       "confidence": 0.95,
+       "chunk": 5109
+      }
+     ],
+     "score": 0.95
+    }
+   ],
+   "dead_ends": [
+    {
+     "hop": 1,
+     "entity_id": 5445,
+     "entity": "Italy",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 23594,
+     "entity": "Luis Marquina",
+     "expected_relation": "date of birth"
+    },
+    {
+     "hop": 1,
+     "entity_id": 6848,
+     "entity": "Spain",
+     "expected_relation": "date of birth"
+    }
+   ],
+   "chunks": [
+    {
+     "id": 86,
+     "title": "The Nurse in the Military Madhouse"
+    },
+    {
+     "id": 2863,
+     "title": "Mariano Laurenti"
+    },
+    {
+     "id": 5109,
+     "title": "Tuset Street"
+    },
+    {
+     "id": 3972,
+     "title": "Jorge Grau"
+    }
+   ],
+   "attributes": {
+    "88": {
+     "publication_date": "1979"
+    },
+    "2865": {
+     "date_of_birth": "15 April 1929"
+    },
+    "3974": {
+     "date_of_birth": "27 October 1930"
+    },
+    "5111": {
+     "publication_date": "1968"
+    }
+   },
+   "answer": "The Nurse in the Military Madhouse",
+   "run_params": {
+    "beam_k": 5,
+    "max_hops": 3,
+    "fetch_limit": 200,
+    "chain_boost": 3.0,
+    "answer_max_chunks": 5,
+    "answer_max_tokens": 100,
+    "extract_model": "claude-haiku-4-5-20251001",
+    "answer_model": "claude-haiku-4-5-20251001",
+    "answer_prompt_sha": "337599400a9e"
+   },
+   "gold": "The Nurse In The Military Madhouse",
+   "type": "bridge_comparison"
+  }
+ ]
+}
