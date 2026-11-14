@@ -1,0 +1,95 @@
+{
+ "learned_iteration_cost_split_usd": {
+  "0": {
+   "heldout": 0.0,
+   "feedback": 0.43748,
+   "repair": 0.0,
+   "total": 0.43748
+  },
+  "1": {
+   "heldout": 0.19832,
+   "feedback": 0.22019,
+   "repair": 0.04274,
+   "total": 0.46125
+  },
+  "2": {
+   "heldout": 0.15982,
+   "feedback": 0.30896,
+   "repair": 0.02104,
+   "total": 0.48982
+  },
+  "3": {
+   "heldout": 0.18256,
+   "feedback": 0.22157,
+   "repair": 0.01367,
+   "total": 0.4178
+  },
+  "4": {
+   "heldout": 0.14312,
+   "feedback": 0.22241,
+   "repair": 0.00633,
+   "total": 0.37186
+  },
+  "5": {
+   "heldout": 0.1404,
+   "feedback": 0.25944,
+   "repair": 0.00568,
+   "total": 0.40552
+  }
+ },
+ "learned_cumulative_usd": {
+  "0": 0.4375,
+  "1": 0.8987,
+  "2": 1.3885,
+  "3": 1.8063,
+  "4": 2.1782,
+  "5": 2.5837
+ },
+ "learned_cumulative_heldout_and_repair_only_usd": {
+  "0": 0.0,
+  "1": 0.2411,
+  "2": 0.4219,
+  "3": 0.6181,
+  "4": 0.7676,
+  "5": 0.9137
+ },
+ "iterations_to_match": {
+  "random": {
+   "random_iteration5_em": 0.5172,
+   "first_learned_iteration_with_em_at_least_that": 1,
+   "learned_em_at_that_iteration": 0.5287,
+   "learned_cumulative_cost_usd_all_in": 0.8987,
+   "learned_cumulative_cost_usd_heldout_and_repair_only": 0.2411,
+   "random_full_five_iteration_cost_usd": 0.645
+  },
+  "random_s7": {
+   "random_iteration5_em": 0.5287,
+   "first_learned_iteration_with_em_at_least_that": 1,
+   "learned_em_at_that_iteration": 0.5287,
+   "learned_cumulative_cost_usd_all_in": 0.8987,
+   "learned_cumulative_cost_usd_heldout_and_repair_only": 0.2411,
+   "random_full_five_iteration_cost_usd": 0.6486
+  }
+ },
+ "gain_over_static_em": {
+  "learned": 0.1034,
+  "random": 0.0459,
+  "random_s7": 0.0574
+ },
+ "total_cost_usd": {
+  "learned": 2.5837,
+  "random": 0.645,
+  "random_s7": 0.6486
+ },
+ "usd_per_0.01_em_gain_over_static": {
+  "learned": 0.25,
+  "random": 0.141,
+  "random_s7": 0.113
+ },
+ "query_time_extraction_calls_total": {
+  "learned": 58,
+  "random": 34,
+  "random_s7": 34
+ },
+ "learned_repair_chunks_total": 114
+}
