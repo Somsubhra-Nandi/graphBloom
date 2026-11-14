@@ -1,0 +1,52 @@
+[
+ {
+  "check": "split files regenerate identically from seed 42",
+  "pass": true,
+  "detail": "{\"feedback.jsonl\": \"c27e413f15b3a6aa\", \"heldout.jsonl\": \"19c80f52d103a555\", \"corpus.jsonl\": \"bce054858cbabfa0\"}"
+ },
+ {
+  "check": "stored EM/F1 recompute from prediction and gold",
+  "pass": true,
+  "detail": "29 result files, 0 mismatches"
+ },
+ {
+  "check": "per-iteration summaries match their rows (3 runs x 6 iterations)",
+  "pass": true,
+  "detail": "0 mismatches"
+ },
+ {
+  "check": "results/curve.json equals build_curve()",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "paired bootstrap comparisons recompute (seed 42, 10,000 resamples)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "learned_iter5 graph + cache reproduce the iteration-5 predictions",
+  "pass": true,
+  "detail": "0 differing, 0 cache misses, 0 spend"
+ },
+ {
+  "check": "run_params identical in every held-out trace (learned, random, static)",
+  "pass": true,
+  "detail": "1 distinct"
+ },
+ {
+  "check": "heldout.jsonl carries no evidence or supporting facts",
+  "pass": true,
+  "detail": "['_id', 'answer', 'question', 'type']"
+ },
+ {
+  "check": "classifier never opens heldout.jsonl",
+  "pass": true,
+  "detail": "feedback.jsonl is its only question file"
+ },
+ {
+  "check": "spend ledger: phases sum to the total and stay under budget",
+  "pass": true,
+  "detail": "total $6.3984, reserve $0"
+ }
+]
