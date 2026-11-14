@@ -269,6 +269,12 @@ def call(model, prompt, system="", schema=None, max_tokens=1024, temperature=0.0
     return result
 
 
+def cache_lookup(model, prompt, system="", schema=None, max_tokens=1024, temperature=0.0):
+    """(hit, result) for a call without making it and without touching the ledger or stats."""
+    p = _cache_path(_key(model, system, prompt, schema, {"max_tokens": max_tokens, "temperature": temperature}))
+    return (True, json.loads(p.read_text())["result"]) if p.exists() else (False, None)
+
+
 def pending_batches():
     """Batches submitted but not yet settled: {batch_id: {phase, est, n, model}}."""
     with _lock:
