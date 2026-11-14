@@ -59,6 +59,46 @@
    "share_le_0": 0.0016
   }
  },
+ "learned_iter5_vs_open_vocab": {
+  "em": {
+   "n": 87,
+   "mean_diff": 0.023,
+   "ci95": [
+    0.0,
+    0.0575
+   ],
+   "share_le_0": 0.1305
+  },
+  "f1": {
+   "n": 87,
+   "mean_diff": 0.0084,
+   "ci95": [
+    -0.0222,
+    0.0437
+   ],
+   "share_le_0": 0.3186
+  }
+ },
+ "open_vocab_vs_static_graph": {
+  "em": {
+   "n": 87,
+   "mean_diff": 0.0805,
+   "ci95": [
+    0.023,
+    0.1494
+   ],
+   "share_le_0": 0.0093
+  },
+  "f1": {
+   "n": 87,
+   "mean_diff": 0.0951,
+   "ci95": [
+    0.0266,
+    0.1673
+   ],
+   "share_le_0": 0.0026
+  }
+ },
  "static_graph_vs_bm25": {
   "em": {
    "n": 87,

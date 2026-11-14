@@ -2,7 +2,9 @@
 
   A1  growth only: replay the learned run's schema sequence (from results/learned/state.json) with query-time
       extraction OFF. The graph stays the iteration-0 graph, so only the planner's vocabulary changes.
-  A2  query-time extraction only: the static 8-relation schema with query-time extraction ON.
+  (A2, query-time extraction on a static schema, was removed: it is degenerate. The planner only requests seed
+  relations, which were all extracted at ingest, so extraction never fires. The open-vocabulary baseline
+  (scripts/open_vocab.py) replaces it.)
 Held-out at iterations 1, 3 and 5. Run on the iteration-0 snapshot; results go to results/ablations/<A>/iter<k>/.
 
   .venv/bin/python scripts/ablate.py --ablation A1 --estimate     # cost estimate from the cache, no calls
@@ -58,7 +60,7 @@ def install_estimator(counter):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ablation", required=True, choices=["A1", "A2"])
+    ap.add_argument("--ablation", required=True, choices=["A1"])
     ap.add_argument("--estimate", action="store_true")
     ap.add_argument("--workers", type=int, default=config.LLM_WORKERS)
     args = ap.parse_args()
@@ -71,10 +73,10 @@ def main():
         out_root = Path("/tmp/_ablate_estimate") / args.ablation
     summ = {}
     for k in ITERATIONS:
-        schema = schema_at(k, added, pool) if args.ablation == "A1" else ActiveSchema()
+        schema = schema_at(k, added, pool)
         g = Graph(schema=schema)
         eng = QueryEngine(g, phase="learning", schema=schema)
-        extractor = QueryTimeExtractor(g, schema, k) if args.ablation == "A2" else None
+        extractor = None  # growth only: query-time extraction off
         before = llm.total_spent()
         rows, err = run_questions(learn.load_heldout(), lambda q: eng.answer(q["question"], extractor, q["_id"]), out_root / f"iter{k}" / "heldout.jsonl", args.workers)
         s = summarize(rows)

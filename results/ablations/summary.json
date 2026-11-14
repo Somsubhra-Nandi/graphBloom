@@ -1,5 +1,5 @@
 {
- "note": "Held-out EM, 87 questions. A1: schema growth replayed, query-time extraction off. A2: static 8-relation schema, query-time extraction on. Both equal the static graph.",
+ "note": "Held-out EM, 87 questions. A1: schema growth replayed with query-time extraction off; it equals the static graph. (An A2, query-time extraction on a static schema, was removed: the planner only requests seed relations, which are already extracted, so extraction never fires.)",
  "rows": [
   {
    "iteration": 1,
@@ -7,7 +7,6 @@
    "random42_em": 0.4828,
    "random7_em": 0.4943,
    "A1_growth_only_em": 0.4713,
-   "A2_query_time_only_em": 0.4713,
    "static_em": 0.4713
   },
   {
@@ -16,7 +15,6 @@
    "random42_em": 0.4943,
    "random7_em": 0.5057,
    "A1_growth_only_em": 0.4713,
-   "A2_query_time_only_em": 0.4713,
    "static_em": 0.4713
   },
   {
@@ -25,7 +23,6 @@
    "random42_em": 0.5172,
    "random7_em": 0.5287,
    "A1_growth_only_em": 0.4713,
-   "A2_query_time_only_em": 0.4713,
    "static_em": 0.4713
   }
  ]

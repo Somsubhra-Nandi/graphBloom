@@ -1,19 +1,19 @@
 {
- "total": 6.3984095,
+ "total": 6.5286045,
  "by_phase": {
   "ingest": 2.055734,
   "smoke": 0.465328,
-  "learning": 3.8773475
+  "learning": 4.0075425
  },
  "by_phase_calls": {
   "ingest": 1815,
   "smoke": 282,
-  "learning": 2647
+  "learning": 2734
  },
  "by_phase_out_tokens": {
   "ingest": 339013,
   "smoke": 26809,
-  "learning": 238314
+  "learning": 246053
  },
  "pending": {}
 }

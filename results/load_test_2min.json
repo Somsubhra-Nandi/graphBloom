@@ -1,0 +1,79 @@
+{
+ "mode": "continuous writer for 2.0 min",
+ "concurrent_queries": 50,
+ "llm": "cache lookups only (no spend)",
+ "baseline_no_writes": {
+  "n": 750,
+  "p50_ms": 121,
+  "p95_ms": 169,
+  "max_ms": 237,
+  "mean_ms": 109,
+  "errors": 0
+ },
+ "with_concurrent_repair_writes": {
+  "n": 28800,
+  "p50_ms": 149,
+  "p95_ms": 209,
+  "max_ms": 411,
+  "mean_ms": 133,
+  "errors": 0,
+  "rounds": 576
+ },
+ "writer": {
+  "nodes_written": 325200,
+  "edges_written": 325200,
+  "seconds": 120.2,
+  "batch_size": 200,
+  "nodes_per_second": 2707,
+  "write_batch_p50_ms": 28,
+  "write_batch_p95_ms": 77,
+  "write_batch_max_ms": 126
+ },
+ "per_30s_windows": [
+  {
+   "seconds": "0-30",
+   "queries": 7350,
+   "read_p50_ms": 147,
+   "read_p95_ms": 202,
+   "write_batches": 411,
+   "write_batch_p50_ms": 76
+  },
+  {
+   "seconds": "30-60",
+   "queries": 7200,
+   "read_p50_ms": 150,
+   "read_p95_ms": 209,
+   "write_batches": 417,
+   "write_batch_p50_ms": 76
+  },
+  {
+   "seconds": "60-90",
+   "queries": 7100,
+   "read_p50_ms": 150,
+   "read_p95_ms": 209,
+   "write_batches": 395,
+   "write_batch_p50_ms": 77
+  },
+  {
+   "seconds": "90-120",
+   "queries": 7100,
+   "read_p50_ms": 151,
+   "read_p95_ms": 213,
+   "write_batches": 388,
+   "write_batch_p50_ms": 77
+  },
+  {
+   "seconds": "120-150",
+   "queries": 50,
+   "read_p50_ms": 139,
+   "read_p95_ms": 215,
+   "write_batches": 15,
+   "write_batch_p50_ms": 77
+  }
+ ],
+ "cleanup": {
+  "seconds": 146.2,
+  "test_nodes_left": 0,
+  "created_iter_999_edges_left": 0
+ }
+}

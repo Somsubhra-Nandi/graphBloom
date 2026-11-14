@@ -91,5 +91,64 @@
   "random": 34,
   "random_s7": 34
  },
- "learned_repair_chunks_total": 114
+ "learned_repair_chunks_total": 114,
+ "per_1000_future_queries": {
+  "learned": {
+   "vocabulary_size": 18,
+   "final_held_out_em": 0.5747,
+   "one_time_usd": 1.7595,
+   "recurring_usd_per_1000_queries": 4.21,
+   "recurring_parts_usd_per_1000": {
+    "planner": 1.48,
+    "answer": 1.66,
+    "query_time_extraction": 1.07
+   },
+   "query_time_extraction_calls_per_query": 0.667,
+   "total_usd_for_1000_queries": 5.97,
+   "total_usd_for_10000_queries": 43.91
+  },
+  "random": {
+   "vocabulary_size": 18,
+   "final_held_out_em": 0.5172,
+   "one_time_usd": 0.0,
+   "recurring_usd_per_1000_queries": 3.77,
+   "recurring_parts_usd_per_1000": {
+    "planner": 1.48,
+    "answer": 1.66,
+    "query_time_extraction": 0.63
+   },
+   "query_time_extraction_calls_per_query": 0.391,
+   "total_usd_for_1000_queries": 3.77,
+   "total_usd_for_10000_queries": 37.72
+  },
+  "random_s7": {
+   "vocabulary_size": 18,
+   "final_held_out_em": 0.5287,
+   "one_time_usd": 0.0,
+   "recurring_usd_per_1000_queries": 3.77,
+   "recurring_parts_usd_per_1000": {
+    "planner": 1.49,
+    "answer": 1.66,
+    "query_time_extraction": 0.63
+   },
+   "query_time_extraction_calls_per_query": 0.391,
+   "total_usd_for_1000_queries": 3.77,
+   "total_usd_for_10000_queries": 37.74
+  },
+  "open_vocab": {
+   "vocabulary_size": 22,
+   "final_held_out_em": 0.5517,
+   "one_time_usd": 0.0,
+   "recurring_usd_per_1000_queries": 4.04,
+   "recurring_parts_usd_per_1000": {
+    "planner": 1.5,
+    "answer": 1.66,
+    "query_time_extraction": 0.88
+   },
+   "query_time_extraction_calls_per_query": 0.552,
+   "total_usd_for_1000_queries": 4.04,
+   "total_usd_for_10000_queries": 40.43
+  },
+  "note": "One-time cost is only the learned policy's feedback evaluation, diagnosis and repair extraction. Random and open-vocabulary have no dollar one-time cost but both take their relations from the gold evidence of the feedback questions (the candidate pool), i.e. they assume someone already knows which relations matter. Held-out re-evaluation at each iteration is experiment overhead and is excluded."
+ }
 }

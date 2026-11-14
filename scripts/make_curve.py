@@ -24,6 +24,8 @@ pairs = {
     "learned_iter5_vs_random_iter5": (R / "learned/iter5/heldout.jsonl", R / "random/iter5/heldout.jsonl"),
     "learned_iter5_vs_random_s7_iter5": (R / "learned/iter5/heldout.jsonl", R / "random_s7/iter5/heldout.jsonl"),
     "learned_iter5_vs_static_graph": (R / "learned/iter5/heldout.jsonl", R / "iter0_static_graph/heldout.jsonl"),
+    "learned_iter5_vs_open_vocab": (R / "learned/iter5/heldout.jsonl", R / "open_vocab/heldout.jsonl"),
+    "open_vocab_vs_static_graph": (R / "open_vocab/heldout.jsonl", R / "iter0_static_graph/heldout.jsonl"),
     "static_graph_vs_bm25": (R / "iter0_static_graph/heldout.jsonl", R / "iter0_bm25/heldout.jsonl"),
 }
 out = {k: compare(a, b) for k, (a, b) in pairs.items() if a.exists() and b.exists()}

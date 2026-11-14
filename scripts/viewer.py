@@ -31,7 +31,7 @@ st.set_page_config(page_title="Self-improving graph", layout="wide")
 
 SERIES_COLORS = {
     "learned": "#1b7f3b", "random (seed 42)": "#d95f02", "random (seed 7)": "#e6a15a",
-    "static graph": "#6a51a3", "BM25": "#7f7f7f",
+    "static graph": "#6a51a3", "BM25": "#7f7f7f", "open vocabulary (one pass)": "#1f77b4",
 }
 NODE = {"seed": "#4C78A8", "plain": "#C9CED6", "chain": "#2CA02C", "dead": "#D62728", "attr": "#FFBF00", "ghost": "#FFFFFF"}
 

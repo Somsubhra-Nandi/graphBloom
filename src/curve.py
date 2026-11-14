@@ -9,7 +9,7 @@ import time
 from src import config
 
 RUNS = {"learned": "learned", "random": "random (seed 42)", "random_s7": "random (seed 7)"}
-BASELINES = {"static_graph": "results/iter0_static_graph/summary.json", "bm25": "results/iter0_bm25/summary.json"}
+BASELINES = {"static_graph": "results/iter0_static_graph/summary.json", "bm25": "results/iter0_bm25/summary.json", "open_vocab": "results/open_vocab/summary.json"}
 
 
 def build_curve(results=None):
@@ -44,7 +44,7 @@ def build_curve(results=None):
         p = config.ROOT / rel
         if p.exists():
             o = json.loads(p.read_text())["splits"]["heldout"]["overall"]
-            baselines[name] = {"label": {"static_graph": "static graph", "bm25": "BM25"}[name], "em": o["em"], "em_ci95": o["em_ci95"], "f1": o["f1"], "f1_ci95": o["f1_ci95"]}
+            baselines[name] = {"label": {"static_graph": "static graph", "bm25": "BM25", "open_vocab": "open vocabulary (one pass)"}[name], "em": o["em"], "em_ci95": o["em_ci95"], "f1": o["f1"], "f1_ci95": o["f1_ci95"]}
     cp = results / "costs.json"
     if cp.exists():  # real dollars from the ledger; per-iteration files can read 0 for runs reproduced from cache
         costs = json.loads(cp.read_text())

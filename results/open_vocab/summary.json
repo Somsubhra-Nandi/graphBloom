@@ -1,0 +1,206 @@
+{
+ "run_name": "open_vocab",
+ "system": "open_vocab",
+ "vocabulary": [
+  "director",
+  "date of birth",
+  "publication date",
+  "country of citizenship",
+  "place of birth",
+  "country of origin",
+  "performer",
+  "composer",
+  "father",
+  "date of death",
+  "place of death",
+  "mother",
+  "spouse",
+  "country",
+  "inception",
+  "award received",
+  "employer",
+  "educated at",
+  "publisher",
+  "sibling",
+  "place of burial",
+  "founded by"
+ ],
+ "pool": {
+  "father": {
+   "count": 37,
+   "literal": false
+  },
+  "date of death": {
+   "count": 30,
+   "literal": true
+  },
+  "place of death": {
+   "count": 18,
+   "literal": false
+  },
+  "mother": {
+   "count": 14,
+   "literal": false
+  },
+  "spouse": {
+   "count": 12,
+   "literal": false
+  },
+  "country": {
+   "count": 11,
+   "literal": false
+  },
+  "inception": {
+   "count": 5,
+   "literal": true
+  },
+  "award received": {
+   "count": 3,
+   "literal": false
+  },
+  "employer": {
+   "count": 3,
+   "literal": false
+  },
+  "educated at": {
+   "count": 2,
+   "literal": false
+  },
+  "publisher": {
+   "count": 2,
+   "literal": false
+  },
+  "sibling": {
+   "count": 2,
+   "literal": false
+  },
+  "place of burial": {
+   "count": 1,
+   "literal": false
+  },
+  "founded by": {
+   "count": 1,
+   "literal": false
+  }
+ },
+ "splits": {
+  "heldout": {
+   "overall": {
+    "n": 87,
+    "em": 0.5517,
+    "em_ci95": [
+     0.4483,
+     0.6552
+    ],
+    "f1": 0.6916,
+    "f1_ci95": [
+     0.599,
+     0.7789
+    ]
+   },
+   "by_type": {
+    "bridge_comparison": {
+     "n": 16,
+     "em": 0.875,
+     "em_ci95": [
+      0.6875,
+      1.0
+     ],
+     "f1": 0.9115,
+     "f1_ci95": [
+      0.7708,
+      1.0
+     ]
+    },
+    "comparison": {
+     "n": 21,
+     "em": 0.7143,
+     "em_ci95": [
+      0.5238,
+      0.9048
+     ],
+     "f1": 0.922,
+     "f1_ci95": [
+      0.8653,
+      0.9746
+     ]
+    },
+    "compositional": {
+     "n": 38,
+     "em": 0.4211,
+     "em_ci95": [
+      0.2632,
+      0.5789
+     ],
+     "f1": 0.5953,
+     "f1_ci95": [
+      0.4581,
+      0.7314
+     ]
+    },
+    "inference": {
+     "n": 12,
+     "em": 0.25,
+     "em_ci95": [
+      0.0,
+      0.5
+     ],
+     "f1": 0.3,
+     "f1_ci95": [
+      0.0833,
+      0.5417
+     ]
+    }
+   },
+   "by_hops": {
+    "1": {
+     "n": 21,
+     "em": 0.7143,
+     "em_ci95": [
+      0.5238,
+      0.9048
+     ],
+     "f1": 0.922,
+     "f1_ci95": [
+      0.8653,
+      0.9746
+     ]
+    },
+    "2": {
+     "n": 66,
+     "em": 0.5,
+     "em_ci95": [
+      0.3788,
+      0.6212
+     ],
+     "f1": 0.6182,
+     "f1_ci95": [
+      0.5158,
+      0.7215
+     ]
+    }
+   },
+   "questions": "87/87",
+   "cost_usd": 0.1302,
+   "query_extraction_calls": 48,
+   "queries_with_events": 31,
+   "queries_with_extraction": 41
+  }
+ },
+ "run_params": {
+  "beam_k": 5,
+  "max_hops": 3,
+  "fetch_limit": 200,
+  "chain_boost": 3.0,
+  "answer_max_chunks": 5,
+  "answer_max_tokens": 200,
+  "answer_reasoning": "one sentence before the answer",
+  "dates_in_prompt": "raw text plus ISO form",
+  "dead_end_rule": "planned-chain branches only; leaves and literal steps excluded",
+  "performer_rule": "performer edges dropped when the subject also has a director edge",
+  "min_confidence": 0.6,
+  "extract_model": "claude-haiku-4-5-20251001",
+  "answer_model": "claude-haiku-4-5-20251001",
+  "answer_prompt_sha": "f060db2249b0"
+ }
+}

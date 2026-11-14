@@ -1,0 +1,8 @@
+{
+ "planner_usd_per_query": 0.001485,
+ "answer_usd_per_query": 0.001663,
+ "extraction_usd_per_call": 0.001601,
+ "extraction_calls_priced": 58,
+ "queries": 87,
+ "note": "planner and answer from the learned run's final-iteration cached usage; extraction from the learned run's query-time calls"
+}
