@@ -25,14 +25,14 @@ function Block({ title, sentence, number, unit, children, note }: { title: strin
   return (
     <section className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16 lg:py-28">
       <div>
-        <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">{title}</h2>
-        <p className="mt-4 max-w-sm text-[17px] leading-relaxed text-muted-foreground">{sentence}</p>
+        <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{title}</h2>
+        <p className="mt-4 max-w-sm text-pretty text-[17px] leading-relaxed text-muted-foreground">{sentence}</p>
         <p className="mt-8 text-6xl font-semibold tracking-tight text-primary tnum sm:text-7xl">{number}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{unit}</p>
+        <p className="mt-2 max-w-sm text-[15px] leading-snug text-muted-foreground">{unit}</p>
       </div>
       <div className="min-w-0">
         {children}
-        {note && <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground">{note}</p>}
+        {note && <p className="mt-6 max-w-xl text-pretty text-[15px] leading-relaxed text-muted-foreground">{note}</p>}
       </div>
     </section>
   );
@@ -63,11 +63,11 @@ export function CurveSection({ curve }: { curve: Curve }) {
         {[0.2, 0.3, 0.4, 0.5, 0.6].map((g) => (
           <g key={g}>
             <line x1={L} x2={W - R} y1={y(g)} y2={y(g)} stroke="#1f2837" />
-            <text x={L - 8} y={y(g)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill="#8b95a7">{pct(g)}</text>
+            <text x={L - 8} y={y(g)} textAnchor="end" dominantBaseline="middle" fontSize={12} fill="#9aa4b6">{pct(g)}</text>
           </g>
         ))}
-        {[0, 1, 2, 3, 4, 5].map((i) => <text key={i} x={x(i)} y={H - 10} textAnchor="middle" fontSize={11} fill="#8b95a7">{i}</text>)}
-        <text x={(L + W - R) / 2} y={H + 2} textAnchor="middle" fontSize={11} fill="#8b95a7" />
+        {[0, 1, 2, 3, 4, 5].map((i) => <text key={i} x={x(i)} y={H - 10} textAnchor="middle" fontSize={12} fill="#9aa4b6">{i}</text>)}
+        <text x={(L + W - R) / 2} y={H + 2} textAnchor="middle" fontSize={12} fill="#9aa4b6" />
         <line x1={x(0)} x2={x(5)} y1={y(bm.em)} y2={y(bm.em)} stroke="#8b95a7" strokeDasharray="2 5" />
         <line x1={x(0)} x2={x(5)} y1={y(stat.em)} y2={y(stat.em)} stroke="#8b95a7" strokeDasharray="6 5" />
         {randoms.map((s) => <motion.path key={s.key} d={path(s.em)} fill="none" stroke="#9aa6bd" strokeWidth={1.8} strokeOpacity={0.75} {...draw} />)}
@@ -81,7 +81,7 @@ export function CurveSection({ curve }: { curve: Curve }) {
         {tag(y(bm.em), "Keyword search", "#8b95a7")}
       </svg>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">Horizontal axis: learning iteration. Vertical axis: exact-match accuracy on held-out questions.</p>
+      <p className="mt-2 text-[13px] leading-snug text-muted-foreground">Horizontal axis: learning iteration. Vertical axis: exact-match accuracy on held-out questions.</p>
     </Block>
   );
 }
@@ -125,13 +125,13 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
         {[1, 10, 100, 1000].map((g) => (
           <g key={g}>
             <line x1={L} x2={W - R} y1={y(g)} y2={y(g)} stroke="#1f2837" />
-            <text x={L - 8} y={y(g)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill="#8b95a7">{usd(g)}</text>
+            <text x={L - 8} y={y(g)} textAnchor="end" dominantBaseline="middle" fontSize={12} fill="#9aa4b6">{usd(g)}</text>
           </g>
         ))}
         {[2000, 10_000, 100_000, 1_000_000].map((d) => (
-          <text key={d} x={x(d)} y={H - 18} textAnchor="middle" fontSize={11} fill="#8b95a7">{docsLabel(d)}</text>
+          <text key={d} x={x(d)} y={H - 18} textAnchor="middle" fontSize={12} fill="#9aa4b6">{docsLabel(d)}</text>
         ))}
-        <text x={(L + W - R) / 2} y={H - 3} textAnchor="middle" fontSize={11} fill="#8b95a7">documents</text>
+        <text x={(L + W - R) / 2} y={H - 3} textAnchor="middle" fontSize={12} fill="#9aa4b6">documents</text>
         {qs.map((s) => {
           const v = pr.ours_extra_by_queries[s.q];
           return (
@@ -149,16 +149,16 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
         })}
       </svg>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">Extra cost of the 14 relations beyond the shallow first pass. White: extract all 22 relations up front, which grows with documents. Green: extract only what questions need, which grows with questions asked and not with documents.</p>
+      <p className="mt-2 text-[13px] leading-snug text-muted-foreground">Extra cost of the 14 relations beyond the shallow first pass. White: extract all 22 relations up front, which grows with documents. Green: extract only what questions need, which grows with questions asked and not with documents.</p>
 
       <div className="mt-8 rounded-xl border border-border bg-card p-4">
-        <p className="text-sm font-semibold">Per 1,000 questions</p>
+        <p className="text-[15px] font-semibold">Per 1,000 questions</p>
         <div className="mt-2 flex flex-wrap gap-x-8 gap-y-1 tnum text-sm">
           <span>Learned <b className="text-primary">${learned.recurring_usd.toFixed(2)}</b></span>
           <span className="text-muted-foreground">Random <b className="text-foreground">${rand.recurring_usd.toFixed(2)}</b></span>
           <span className="text-muted-foreground">Open vocabulary <b className="text-foreground">${open.recurring_usd.toFixed(2)}</b></span>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">The learned policy pays slightly more per question because it extracts more of what questions need.</p>
+        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">The learned policy pays slightly more per question because it extracts more of what questions need.</p>
       </div>
     </Block>
   );
@@ -184,7 +184,7 @@ export function LatencySection({ lt }: { lt: Metrics["load_test"] }) {
             <p className="mb-2 text-sm text-muted-foreground">{b.label}</p>
             {[{ k: "Median", v: b.p50, c: "#6c7a96" }, { k: "Slowest 5%", v: b.p95, c: "var(--primary)" }].map((m) => (
               <div key={m.k} className="mb-1.5 flex items-center gap-3">
-                <span className="w-20 shrink-0 text-xs text-muted-foreground">{m.k}</span>
+                <span className="w-24 shrink-0 text-[13px] text-muted-foreground">{m.k}</span>
                 <div className="flex-1"><motion.div className="h-5 origin-left rounded-sm" style={{ width: `${(m.v / max) * 100}%`, background: m.c }} initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: "-5%" }} transition={{ duration: 0.8, ease: "easeOut" }} /></div>
                 <span className="tnum w-16 shrink-0 text-right text-sm">{m.v} ms</span>
               </div>
@@ -197,7 +197,7 @@ export function LatencySection({ lt }: { lt: Metrics["load_test"] }) {
             {lt.windows.map((w) => (
               <div key={w.seconds} className="rounded-md border border-border px-3 py-2 text-center">
                 <div className="tnum text-base font-medium">{w.read_p95_ms} ms</div>
-                <div className="text-xs text-muted-foreground">{w.seconds} s</div>
+                <div className="text-[13px] text-muted-foreground">{w.seconds} s</div>
               </div>
             ))}
           </div>
@@ -235,7 +235,7 @@ export function HowItWorks({ before, after }: { before: number; after: number })
             <li key={s.t} className="rounded-xl border border-border bg-card p-4">
               <svg viewBox="0 0 120 60" className="mb-3 h-14 w-full" aria-hidden>{glyph[i]}</svg>
               <p className="font-semibold"><span className="text-muted-foreground tnum">{i + 1}. </span>{s.t}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{s.s}</p>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{s.s}</p>
             </li>
           ))}
         </ol>
