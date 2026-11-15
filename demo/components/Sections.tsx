@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Curve, CostRow, Metrics } from "@/lib/types";
+import type { Curve, Metrics } from "@/lib/types";
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
@@ -67,40 +67,75 @@ export function CurveSection({ curve }: { curve: Curve }) {
   );
 }
 
-const PART_COLOR = { planner: "#46526a", answer: "#6c7a96", query_time_extraction: "var(--primary)" };
-const PART_LABEL = { planner: "Planning the question", answer: "Writing the answer", query_time_extraction: "Reading for missing facts" };
+const usd = (v: number) => (v >= 100 ? `$${Math.round(v).toLocaleString()}` : v >= 10 ? `$${v.toFixed(0)}` : `$${v.toFixed(2)}`);
+const docsLabel = (n: number) => (n >= 1e6 ? `${n / 1e6}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : `${n}`);
 
-export function CostSection({ cost }: { cost: Metrics["cost"] }) {
-  const rows = cost.per_1000_queries;
-  const learned = rows[0];
-  const max = Math.max(...rows.map((r) => r.recurring_usd));
+export function CostSection({ metrics }: { metrics: Metrics }) {
+  const pr = metrics.projection;
+  const rows = metrics.cost.per_1000_queries;
+  const [learned, rand, , open] = rows;
+  const at = (docs: number, q: number) => pr.totals.find((t) => t.documents === docs && t.queries === q)!;
+  const head = at(1_000_000, 10_000);
+  const saving = 1 - head.ours_total / head.full_extraction_total;
+  const crossDocs = Math.round(pr.ours_extra_by_queries["10000"] / (pr.scaling[24].full_extra_batch / pr.scaling[24].documents) / 1000) * 1000;
+
+  const W = 640, H = 340, L = 56, R = 120, T = 14, B = 40;
+  const x0 = Math.log10(pr.scaling[0].documents), x1 = Math.log10(1_000_000);
+  const y0 = Math.log10(0.5), y1 = Math.log10(2000);
+  const x = (d: number) => L + ((Math.log10(d) - x0) / (x1 - x0)) * (W - L - R);
+  const y = (v: number) => T + (1 - (Math.log10(v) - y0) / (y1 - y0)) * (H - T - B);
+  const full = pr.scaling.map((p, i) => `${i ? "L" : "M"}${x(p.documents)},${y(p.full_extra_batch)}`).join(" ");
+  const qs: { q: string; label: string; accent: boolean }[] = [
+    { q: "10000", label: "10,000 questions", accent: true },
+    { q: "100000", label: "100,000", accent: false },
+    { q: "1000000", label: "1,000,000", accent: false },
+  ];
+  const draw = { initial: { pathLength: 0 }, whileInView: { pathLength: 1 }, viewport: { once: true, margin: "-5%" }, transition: { duration: 1.4, ease: "easeOut" as const } };
   return (
     <Block
       title="Pays only for what's asked"
-      sentence="A fact is read out of the source text only when a question needs it, so the bill grows with the questions, not with the size of the library."
-      number={`$${learned.recurring_usd.toFixed(2)}`}
-      unit={`per 1,000 questions, after a one-time $${learned.one_time_usd.toFixed(2)} of learning`}
-      note="The two random runs and the open-vocabulary run cost a little less per question, but all three were handed their link types from the same questions. Learning finds them from feedback, which is what the one-time cost buys."
+      sentence="Extracting every relation from every document costs more as the library grows. Ours costs more as the questions grow."
+      number={`${Math.round(saving * 100)}% less`}
+      unit={`than extracting everything first, for ${(10_000).toLocaleString()} questions over 1 million documents (${usd(head.ours_total)} against ${usd(head.full_extraction_total)})`}
+      note={`The chart counts only the extra cost of the 14 relations the first pass skips; both approaches pay for the same shallow first pass. At our own ${pr.scaling[0].documents.toLocaleString()} documents, extracting everything up front is cheaper. Ours pulls ahead past roughly ${crossDocs.toLocaleString()} documents at 10,000 questions, and falls behind once the questions asked exceed about ${(Math.round(pr.break_even_queries["1000000"] / 1000) * 1000).toLocaleString()} over 1 million documents. Projected linearly from measured costs, using the cheaper batch rate for ingest.`}
     >
-      <div className="space-y-5">
-        {rows.map((r: CostRow) => (
-          <div key={r.key}>
-            <div className="mb-1.5 flex items-baseline justify-between text-sm">
-              <span className={r.key === "learned" ? "font-semibold" : "text-muted-foreground"}>{r.label}</span>
-              <span className="tnum text-muted-foreground">${r.recurring_usd.toFixed(2)}</span>
-            </div>
-            <motion.div className="flex h-5 origin-left overflow-hidden rounded-sm" style={{ width: `${(r.recurring_usd / max) * 100}%` }} initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: "-5%" }} transition={{ duration: 0.9, ease: "easeOut" }}>
-              {(Object.keys(PART_COLOR) as (keyof typeof PART_COLOR)[]).map((k) => (
-                <div key={k} style={{ width: `${(r.parts[k] / r.recurring_usd) * 100}%`, background: PART_COLOR[k] }} title={`${PART_LABEL[k]}: $${r.parts[k].toFixed(2)}`} />
-              ))}
-            </motion.div>
-          </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Extra extraction cost as the number of documents grows, for full extraction and for question-driven extraction">
+        {[1, 10, 100, 1000].map((g) => (
+          <g key={g}>
+            <line x1={L} x2={W - R} y1={y(g)} y2={y(g)} stroke="#1f2837" />
+            <text x={L - 8} y={y(g)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill="#8b95a7">{usd(g)}</text>
+          </g>
         ))}
-      </div>
-      <div className="mt-6 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
-        {(Object.keys(PART_COLOR) as (keyof typeof PART_COLOR)[]).map((k) => (
-          <span key={k} className="flex items-center gap-1.5"><i className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: PART_COLOR[k] }} />{PART_LABEL[k]}</span>
+        {[2000, 10_000, 100_000, 1_000_000].map((d) => (
+          <text key={d} x={x(d)} y={H - 18} textAnchor="middle" fontSize={11} fill="#8b95a7">{docsLabel(d)}</text>
         ))}
+        <text x={(L + W - R) / 2} y={H - 3} textAnchor="middle" fontSize={11} fill="#8b95a7">documents</text>
+        {qs.map((s) => {
+          const v = pr.ours_extra_by_queries[s.q];
+          return (
+            <g key={s.q}>
+              <motion.line x1={x(pr.scaling[0].documents)} x2={x(1_000_000)} y1={y(v)} y2={y(v)} stroke={s.accent ? "var(--primary)" : "#8b95a7"} strokeWidth={s.accent ? 3 : 1.6} strokeDasharray={s.accent ? undefined : "5 5"} {...draw} />
+              <text x={x(1_000_000) + 8} y={y(v)} fontSize={12} fill={s.accent ? "var(--primary)" : "#9aa6bd"} fontWeight={s.accent ? 600 : 400} dominantBaseline="middle">{s.label}</text>
+            </g>
+          );
+        })}
+        <motion.path d={full} fill="none" stroke="#e8ebf1" strokeWidth={3} strokeLinecap="round" {...draw} />
+        <text x={x(1_000_000) + 8} y={y(pr.scaling[24].full_extra_batch)} fontSize={12} fill="#e8ebf1" fontWeight={600} dominantBaseline="middle">Extract all</text>
+        {[100_000, 1_000_000].map((d) => {
+          const v = pr.scaling[24].full_extra_batch * (d / 1_000_000);
+          return <g key={d}><circle cx={x(d)} cy={y(v)} r={4} fill="#e8ebf1" /><text x={x(d) - 8} y={y(v) - 10} textAnchor="end" fontSize={12} fill="#e8ebf1">{usd(v)}</text></g>;
+        })}
+      </svg>
+      <p className="mt-1 text-xs text-muted-foreground">Extra cost of the 14 relations beyond the shallow first pass. White: extract all 22 relations up front, which grows with documents. Green: extract only what questions need, which grows with questions asked and not with documents.</p>
+
+      <div className="mt-8 rounded-xl border border-border bg-card p-4">
+        <p className="text-sm font-semibold">Per 1,000 questions</p>
+        <div className="mt-2 flex flex-wrap gap-x-8 gap-y-1 tnum text-sm">
+          <span>Learned <b className="text-primary">${learned.recurring_usd.toFixed(2)}</b></span>
+          <span className="text-muted-foreground">Random <b className="text-foreground">${rand.recurring_usd.toFixed(2)}</b></span>
+          <span className="text-muted-foreground">Open vocabulary <b className="text-foreground">${open.recurring_usd.toFixed(2)}</b></span>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">The learned policy pays slightly more per question because it extracts more of what questions need.</p>
       </div>
     </Block>
   );

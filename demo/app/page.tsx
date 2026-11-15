@@ -9,7 +9,7 @@ export default function Page() {
     <main>
       <Hero />
       <CurveSection curve={curve} />
-      <CostSection cost={metrics.cost} />
+      <CostSection metrics={metrics} />
       <LatencySection lt={metrics.load_test} />
       <HowItWorks before={8} after={8 + grown} />
       <footer className="mx-auto max-w-6xl px-5 pb-16 text-sm text-muted-foreground sm:px-8">
