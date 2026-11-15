@@ -287,9 +287,10 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
       }
     };
 
-    const frame = (now: number) => {
+    const speed = Number(new URLSearchParams(location.search).get("slow")) > 0 ? 1 / Number(new URLSearchParams(location.search).get("slow")) : 1; // ?slow=4 plays at quarter speed, for capturing frames
+    const frame = (raw: number) => {
       raf = requestAnimationFrame(frame);
-      frame2(now);
+      frame2(t0 + (raw - t0) * speed);
     };
     const frame2 = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
