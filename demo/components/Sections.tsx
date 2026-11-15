@@ -151,7 +151,18 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
       </div>
       <p className="mt-2 text-[13px] leading-snug text-muted-foreground">Extra cost of the 14 relations beyond the shallow first pass. White: extract all 22 relations up front, which grows with documents. Green: extract only what questions need, which grows with questions asked and not with documents.</p>
 
-      <div className="mt-8 rounded-xl border border-border bg-card p-4">
+      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-[15px] font-semibold text-primary">Who it is for</p>
+          <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">Large collections where most documents are rarely asked about: legal discovery, enterprise archives, research libraries.</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-[15px] font-semibold">Who it is not for</p>
+          <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">Small collections that are asked about heavily. There, extracting everything up front is cheaper.</p>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-border bg-card p-4">
         <p className="text-[15px] font-semibold">Per 1,000 questions</p>
         <div className="mt-2 flex flex-wrap gap-x-8 gap-y-1 tnum text-sm">
           <span>Learned <b className="text-primary">${learned.recurring_usd.toFixed(2)}</b></span>
