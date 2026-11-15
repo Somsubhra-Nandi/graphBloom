@@ -7,6 +7,8 @@ import type { GNode, GraphData, StageState, Story } from "@/lib/types";
 
 const ForceGraph3D = dynamic(() => import("react-force-graph-3d"), { ssr: false });
 
+// recording build only (NEXT_PUBLIC_DEMO=1 at build time): no automatic story cycling, stories start on command
+const DEMO = process.env.NEXT_PUBLIC_DEMO === "1";
 const EMPTY = { nodes: [], links: [] }; // positions are fixed, so the library only supplies the renderer and camera controls
 const K = 0.3; // overlay size, in graph units
 const GREEN = 0x5be3a4;
@@ -22,6 +24,7 @@ type Props = {
   onState: (s: StageState) => void;
   onReady?: () => void;
   showFps?: boolean;
+  control?: React.MutableRefObject<{ startStory: (i: number) => void } | null>;
 };
 
 type Beam = { mesh: THREE.Mesh; parts: THREE.Sprite[]; a: THREE.Vector3; b: THREE.Vector3; p: number };
@@ -52,16 +55,16 @@ function phasePlan(s: Story) {
     phases: [
       ["question", 3.0],
       ["walk", 1.4 + walk * 1.0],
-      ["deadend", 2.8],
-      ["grow", 2.6],
-      ["complete", 1.4 + rest * 1.1],
+      ["deadend", DEMO ? 3.6 : 2.8],
+      ["grow", DEMO ? 6.5 : 2.6],
+      ["complete", 1.4 + rest * 1.1 + (DEMO ? 2.0 : 0)],
       ["tick", 2.6],
       ["rest", 0.8],
     ] as [string, number][],
   };
 }
 
-export default function GraphStage({ graph, stories, mode, iter, onState, onReady, showFps }: Props) {
+export default function GraphStage({ graph, stories, mode, iter, onState, onReady, showFps, control }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const fgRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -294,6 +297,8 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
     let disp = countByIter[0]; // the starting graph is there from the first frame
     let lastDispRounded = -1;
     let t0 = performance.now(), last = t0, storyIdx = -1, storyStart = 0, lastEmit = "", frames = 0, fpsT = last, curveIter = 0, graphIter = 0, lastMode = "";
+    let pendingStory: number | null = null;
+    if (control) control.current = { startStory: (i) => { pendingStory = i; } };
     let raf = 0;
     const emit = (story: number, phase: string) => {
       const key = `${story}|${phase}|${graphIter}|${curveIter}`;
@@ -331,7 +336,21 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
         emit(-1, phase);
       } else {
         if (lastMode !== "story") { storyIdx = -1; }
-        if (storyIdx === -1 || !live) {
+        if (DEMO && pendingStory !== null) {
+          storyIdx = pendingStory;
+          live = startStory(ss[pendingStory]);
+          storyStart = now;
+          graphIter = 0; curveIter = 0;
+          pendingStory = null;
+        }
+        if (DEMO && !live) {
+          // waiting for a command: wide view, slow orbit
+          for (let i = 0; i < 4; i++) setLabel(i, null, "", "");
+          emit(-1, "idle");
+          lastMode = md;
+          wantC = wideC; wantD = wideR * 1.75;
+        } else {
+        if (!DEMO && (storyIdx === -1 || !live)) {
           storyIdx = (storyIdx + 1) % ss.length;
           live = startStory(ss[storyIdx]);
           storyStart = now;
@@ -344,6 +363,10 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
         for (const [n, d] of L.phases) {
           if (el_ < acc + d) { name = n; u = el_ - acc; found = true; break; }
           acc += d; idx++;
+        }
+        if (!found && DEMO) {
+          clearLive();
+          return;
         }
         if (!found) {
           // story over: next one
@@ -404,7 +427,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
           setLabel(2, deadN, `missing fact: ${s.before.dead_end.missing_relation}`, "bad");
         }
         if (name === "grow" || name === "complete" || name === "tick") {
-          const prog = name === "grow" ? ease(u / 1.8) : 1;
+          const prog = name === "grow" ? ease(u / (DEMO ? 4.6 : 1.8)) : 1;
           setBeam(L.after[fix], prog, GREEN, t, name === "grow");
           if (name === "grow") {
             pop(fix, 15, prog < 1 ? RED : GREEN);
@@ -440,6 +463,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
         wantC = name === "question" && u < 0.01 ? wideC : L.center;
         wantD = name === "rest" ? wideR * 1.3 : Math.max(L.radius * 2.6 + 60, 130);
         emit(storyIdx, phase);
+        }
       }
       lastMode = md;
 

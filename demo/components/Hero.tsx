@@ -12,6 +12,9 @@ import type { Curve, GraphData, Mutation, StageState, Story } from "@/lib/types"
 
 type Data = { graph: GraphData | null; stories: Story[]; curve: Curve; mutations: Mutation[] };
 
+// recording build only (NEXT_PUBLIC_DEMO=1 at build time, ?demo=1 in the URL)
+const DEMO_BUILD = process.env.NEXT_PUBLIC_DEMO === "1";
+
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 function caption(s: Story, st: StageState, curve: Curve) {
@@ -39,6 +42,8 @@ export default function Hero() {
   const [narrow, setNarrow] = useState<boolean | null>(null);
   const [showFps, setShowFps] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const control = useRef<{ startStory: (i: number) => void } | null>(null);
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
     setShowFps(new URLSearchParams(location.search).has("fps"));
@@ -54,7 +59,7 @@ export default function Hero() {
   const stop = () => { if (timer.current) clearInterval(timer.current); timer.current = null; };
   useEffect(() => stop, []);
 
-  const replay = useCallback(() => {
+  const replay = useCallback((every = 1700) => {
     stop();
     setMode("replay");
     setIter(0);
@@ -63,8 +68,27 @@ export default function Hero() {
       i += 1;
       setIter(i);
       if (i >= 5) stop();
-    }, 1700);
+    }, every);
   }, []);
+  useEffect(() => {
+    if (!DEMO_BUILD || !new URLSearchParams(location.search).has("demo")) return;
+    setDemo(true);
+    document.documentElement.classList.add("demo");
+    (window as unknown as { demo: unknown }).demo = {
+      startStory: (i: number) => { stop(); setMode("story"); control.current?.startStory(i); },
+      startReplay: (every = 3200) => replay(every), // stops on iteration 5
+      scrollTo: (id: string) => {
+        const y = document.getElementById(id)!.getBoundingClientRect().top + window.scrollY - 24;
+        const from = window.scrollY, t0 = performance.now();
+        const step = (t: number) => {
+          const k = Math.min(1, (t - t0) / 1200), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          window.scrollTo(0, from + (y - from) * e);
+          if (k < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      },
+    };
+  }, [replay]);
   const backToStories = () => { stop(); setMode("story"); };
   const onState = useCallback((s: StageState) => setSt(s), []);
 
@@ -83,7 +107,7 @@ export default function Hero() {
 
   return (
     <section className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[radial-gradient(ellipse_at_50%_40%,#111826_0%,#090c12_70%)]">
-      {data && data.graph && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} onReady={() => { performance.mark("gb-ready"); setReady(true); }} showFps={showFps} />}
+      {data && data.graph && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} control={control} onReady={() => { performance.mark("gb-ready"); setReady(true); }} showFps={showFps} />}
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 p-5 sm:p-8">
         <div className="flex items-center justify-between">
@@ -105,7 +129,7 @@ export default function Hero() {
 
       {data && (
         <div className="absolute inset-x-0 bottom-0 z-10 grid gap-3 p-4 sm:p-8 lg:grid-cols-[minmax(0,430px)_1fr_minmax(0,300px)] lg:items-end">
-          <div className="rounded-xl border border-border bg-card/85 p-4 backdrop-blur-md">
+          <div className={`rounded-xl border border-border bg-card/85 p-4 backdrop-blur-md ${demo && mode === "story" && !story ? "invisible" : ""}`}>
             {mode === "story" && story ? (
               <>
                 <div className="mb-2 flex gap-1.5" aria-label={`Example ${st.story + 1} of ${data.stories.length}`}>
@@ -132,7 +156,7 @@ export default function Hero() {
 
           <div className="mx-auto w-full max-w-md rounded-xl border border-border bg-card/85 p-4 backdrop-blur-md">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <Button onClick={replay}>Replay learning</Button>
+              <Button onClick={() => replay()}>Replay learning</Button>
               {mode === "replay" && <button className="-mr-2 rounded-md px-2 py-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-primary" onClick={backToStories}>Back to examples</button>}
             </div>
             <Slider min={0} max={5} step={1} value={[shownIter]} onValueChange={(v) => { stop(); setMode("replay"); setIter(Array.isArray(v) ? v[0] : v); }} aria-label="Learning iteration" />

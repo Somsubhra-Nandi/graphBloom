@@ -158,3 +158,6 @@ html { color-scheme: dark; background: #090c12; }
   --good: #5be3a4;
   --bad: #ff5a6b;
 }
+
+/* recording build: no cursor anywhere */
+html.demo, html.demo * { cursor: none !important; }
