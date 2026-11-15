@@ -58,6 +58,17 @@ class ActiveSchema:
         return {"relations": self.relations, "history": self.history}
 
     @classmethod
+    def from_run_state(cls, state):
+        """Rebuild a run's schema from its results/<run>/state.json: the seed relations plus each iteration's added
+        relations, in order. Gives the same schema.json the run saved, so a replay does not need data/runs/."""
+        schema = cls()
+        for it in sorted(state["added"], key=int):
+            for rel in state["added"][it]:
+                schema.add(rel, state["pool"][rel]["literal"], int(it))
+            schema.history.append({"iteration": int(it), "relations": list(state["added"][it])})
+        return schema
+
+    @classmethod
     def load(cls, path):
         path = Path(path)
         if path.exists():
