@@ -6,3 +6,4 @@ data/raw/
 .env
 data/snapshots/
 data/runs/
+replay-bundle.zip
