@@ -3,6 +3,7 @@ Needs the HydraDB container running with the learned_iter5 snapshot restored (th
   .venv/bin/python scripts/export_demo.py
 """
 import json
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -76,7 +77,26 @@ nodes = [{"id": n["id"], "name": n["name"], "type": node_type(out_r.get(n["id"],
 by_id = {n["id"]: n for n in nodes}
 elist = [{"source": e["s"], "target": e["d"], "type": e["t"], "created_iter": e["it"] or 0} for e in edges]
 edge_it = {(e["source"], e["target"], e["type"]): e["created_iter"] for e in elist}
-dump("graph.json", {"nodes": nodes, "links": elist,
+
+
+def layout(n, pairs):
+    """Run the force layout once, offline (demo/scripts/layout.mjs), so the browser does no layout work."""
+    r = subprocess.run(["node", str(config.ROOT / "demo/scripts/layout.mjs")], input=json.dumps({"n": n, "links": pairs}),
+                       capture_output=True, text=True, cwd=config.ROOT / "demo", check=True)
+    return json.loads(r.stdout)["pos"]
+
+
+# Only connected entities are drawn (the rest are chunk titles that never got a link). Compact columns:
+#   i: entity ids, t: index into types, x/y/z: fixed positions (1 decimal), l: [from, to, created_iter] as node indices.
+# Names are not stored here; the story labels come from stories.json.
+conn = [n for n in nodes if n["degree"] > 0]
+idx = {n["id"]: k for k, n in enumerate(conn)}
+pairs = [[idx[e["source"]], idx[e["target"]]] for e in elist]
+pos = layout(len(conn), pairs)
+types = sorted({n["type"] for n in conn})
+dump("graph.json", {"i": [n["id"] for n in conn], "t": [types.index(n["type"]) for n in conn], "types": types,
+                    "x": [round(v, 1) for v in pos[0::3]], "y": [round(v, 1) for v in pos[1::3]], "z": [round(v, 1) for v in pos[2::3]],
+                    "l": [[a, b, e["created_iter"]] for (a, b), e in zip(pairs, elist)],
                     "counts": {"entities": len(nodes), "edges": len(elist), "isolated": sum(1 for n in nodes if not n["degree"]),
                                "edges_by_iter": dict(sorted(Counter(e["created_iter"] for e in elist).items()))}})
 
