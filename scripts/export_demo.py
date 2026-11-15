@@ -156,6 +156,7 @@ for s in stories:
     print(s["question"], "|", s["gold"], "| fixed by", s["fixed_by"], "iter", s["fixed_iter"], "|", s["before"]["dead_end"])
 
 # ---- metrics ----
+projection = json.loads((R / "cost_projection.json").read_text())
 lt = json.loads((R / "load_test_2min.json").read_text())
 cc = json.loads((R / "cost_comparison.json").read_text())
 rep = json.loads((R / "unit_costs.json").read_text()) if (R / "unit_costs.json").exists() else {}
@@ -172,4 +173,5 @@ dump("metrics.json", {
                                                  ("random_s7", "Random (seed 7)"), ("open_vocab", "Open vocabulary")]],
              "learning_total_usd": cc["total_cost_usd"]["learned"], "match_iteration": cc["iterations_to_match"]["random"]["first_learned_iteration_with_em_at_least_that"],
              "note": per["note"]},
+    "projection": projection,
 })
