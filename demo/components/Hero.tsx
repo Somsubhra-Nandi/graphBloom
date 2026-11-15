@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import GraphStage from "@/components/GraphStage";
 import MiniCurve from "@/components/MiniCurve";
 import MobileHero from "@/components/MobileHero";
+import PilotLink from "@/components/PilotLink";
 import type { Curve, GraphData, Mutation, StageState, Story } from "@/lib/types";
 
 type Data = { graph: GraphData | null; stories: Story[]; curve: Curve; mutations: Mutation[] };
@@ -85,7 +86,10 @@ export default function Hero() {
       {data && data.graph && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} onReady={() => setReady(true)} showFps={showFps} />}
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 p-5 sm:p-8">
-        <p className="text-sm font-medium tracking-wide text-muted-foreground">GraphBloom</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium tracking-wide text-muted-foreground">GraphBloom</p>
+          <PilotLink className="pointer-events-auto" />
+        </div>
         <h1 className="mt-2 max-w-xl text-balance text-3xl font-semibold leading-[1.08] tracking-tight sm:text-5xl" style={{ fontStretch: "92%" }}>
           A knowledge graph that finds out which facts it is missing.
         </h1>
