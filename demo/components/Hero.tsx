@@ -44,7 +44,7 @@ export default function Hero() {
     setShowFps(new URLSearchParams(location.search).has("fps"));
     const small = window.matchMedia("(max-width: 767px)").matches;
     setNarrow(small);
-    const get = (n: string) => fetch(`data/${n}.json`).then((r) => r.json());
+    const get = (n: string) => fetch(`data/${n}.json`).then((r) => r.json()).then((j) => { performance.mark(`gb-${n}-fetched`); return j; });
     // phones skip the 500 KB graph file: they get a still frame instead
     Promise.all([small ? Promise.resolve(null) : get("graph"), get("stories"), get("curve"), get("mutations")])
       .then(([graph, stories, curve, mutations]) => setData({ graph, stories, curve, mutations }))
@@ -83,7 +83,7 @@ export default function Hero() {
 
   return (
     <section className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[radial-gradient(ellipse_at_50%_40%,#111826_0%,#090c12_70%)]">
-      {data && data.graph && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} onReady={() => setReady(true)} showFps={showFps} />}
+      {data && data.graph && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} onReady={() => { performance.mark("gb-ready"); setReady(true); }} showFps={showFps} />}
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 p-5 sm:p-8">
         <div className="flex items-center justify-between">
@@ -99,7 +99,7 @@ export default function Hero() {
       </header>
 
       {!ready && !err && (
-        <div className="absolute inset-0 z-10 grid place-items-center text-sm text-muted-foreground">Laying out {data?.graph ? data.graph.counts.entities - data.graph.counts.isolated : ""} entities…</div>
+        <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center text-sm text-muted-foreground/70" role="status">Loading graph…</div>
       )}
       {err && <div className="absolute inset-0 z-10 grid place-items-center text-sm text-destructive">The data files could not be loaded. Run scripts/export_demo.py and rebuild.</div>}
 
