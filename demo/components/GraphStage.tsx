@@ -3,11 +3,11 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { forceSimulation, forceLink, forceManyBody } from "d3-force-3d";
-import type { GLink, GNode, GraphData, StageState, Story } from "@/lib/types";
+import type { GNode, GraphData, StageState, Story } from "@/lib/types";
 
 const ForceGraph3D = dynamic(() => import("react-force-graph-3d"), { ssr: false });
 
+const EMPTY = { nodes: [], links: [] }; // positions are fixed, so the library only supplies the renderer and camera controls
 const K = 0.3; // overlay size, in graph units
 const GREEN = 0x5be3a4;
 const RED = 0xff5a6b;
@@ -71,21 +71,13 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
   const props = useRef({ mode, iter, stories, onState });
   props.current = { mode, iter, stories, onState };
 
-  const nid = (x: number | GNode) => (typeof x === "object" ? x.id : x);
-  // only connected entities are drawn; the rest are chunk titles that never got a link
-  const data = useRef<{ nodes: GNode[]; links: GLink[] }>(null as never);
+  // positions were computed offline (scripts/export_demo.py); only unpack the columns here
+  const data = useRef<{ nodes: GNode[]; links: { a: number; b: number; c: number }[] }>(null as never);
   if (!data.current) {
-    const nodes = graph.nodes.filter((n) => n.degree > 0).map((n) => ({ ...n }));
-    const links = graph.links.map((l) => ({ ...l }));
-    // lay the graph out once, up front; gravity keeps the many small clusters from drifting apart
-    const sim = forceSimulation(nodes, 3)
-      .force("link", forceLink(links).id((n: GNode) => n.id).distance(14).strength(0.9))
-      .force("charge", forceManyBody().strength(-26).distanceMax(60))
-      .force("gravity", Object.assign((alpha: number) => { for (const n of nodes as any[]) { n.vx -= n.x * 0.12 * alpha; n.vy -= n.y * 0.12 * alpha; n.vz -= n.z * 0.12 * alpha; } }, { initialize: () => {} })) // eslint-disable-line @typescript-eslint/no-explicit-any
-      .alphaDecay(0.015)
-      .stop();
-    for (let i = 0; i < 400; i++) sim.tick();
-    data.current = { nodes, links: links.map((l) => ({ ...l, source: nid(l.source), target: nid(l.target) })) };
+    const nodes: GNode[] = graph.i.map((id, k) => ({ id, type: graph.types[graph.t[k]], x: graph.x[k], y: graph.y[k], z: graph.z[k], degree: 0 }));
+    const links = graph.l.map(([a, b, c]) => ({ a, b, c }));
+    for (const l of links) { nodes[l.a].degree++; nodes[l.b].degree++; }
+    data.current = { nodes, links };
   }
 
   useEffect(() => {
@@ -96,6 +88,15 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
     return () => ro.disconnect();
   }, []);
 
+  // the renderer is loaded lazily; wait for it, then start (no layout work is left to do)
+  useEffect(() => {
+    if (ready || size.w === 0) return;
+    let raf = 0;
+    const wait = () => { if (fgRef.current?.scene) setReady(true); else raf = requestAnimationFrame(wait); };
+    wait();
+    return () => cancelAnimationFrame(raf);
+  }, [ready, size.w]);
+
   useEffect(() => {
     if (!ready) return;
     const fg = fgRef.current;
@@ -105,23 +106,25 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
     controls.enableZoom = false; // keep the mouse wheel for scrolling the page
     controls.enablePan = false;
     fg.renderer().setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    const byId = new Map<number, GNode>(data.current.nodes.map((n) => [n.id, n]));
-    const nid = (x: number | GNode) => (typeof x === "object" ? x.id : x);
+    const nodes = data.current.nodes;
+    const byId = new Map<number, GNode>(nodes.map((n) => [n.id, n]));
 
     // ---- base layers: one instanced mesh for nodes, one line set for links (2 draw calls) ----
-    const links = [...data.current.links].sort((a, b) => a.created_iter - b.created_iter);
-    const countByIter = [0, 1, 2, 3, 4, 5].map((i) => links.filter((l) => l.created_iter <= i).length);
+    const links = [...data.current.links].sort((a, b) => a.c - b.c);
+    const countByIter = [0, 1, 2, 3, 4, 5].map((i) => links.filter((l) => l.c <= i).length);
     const linePos = new Float32Array(links.length * 6);
     const lineCol = new Float32Array(links.length * 6);
     const order = new Map<number, number>();
+    const linkEnds: [number, number][] = [];
     const base = new THREE.Color(0x56627a);
     const fresh = new THREE.Color(GREEN);
     links.forEach((l, i) => {
-      const a = byId.get(nid(l.source))!, b = byId.get(nid(l.target))!;
+      const a = nodes[l.a], b = nodes[l.b];
       linePos.set([a.x!, a.y!, a.z!, b.x!, b.y!, b.z!], i * 6);
-      const c = l.created_iter ? fresh : base;
+      const c = l.c ? fresh : base;
       lineCol.set([c.r, c.g, c.b, c.r, c.g, c.b], i * 6);
       for (const n of [a.id, b.id]) if (!order.has(n)) order.set(n, i);
+      linkEnds.push([l.a, l.b]);
     });
     const lg = new THREE.BufferGeometry();
     lg.setAttribute("position", new THREE.BufferAttribute(linePos, 3));
@@ -130,14 +133,9 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
     const lines = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.7, depthWrite: false }));
     lines.frustumCulled = false;
 
-    const nodes = data.current.nodes;
     const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85 }), nodes.length);
     inst.frustumCulled = false;
     const radius = nodes.map((n) => Math.min(1.3, 0.4 + Math.sqrt(n.degree) * 0.14));
-    nodes.forEach((n, i) => {
-      const c = new THREE.Color(TYPE_COLOR[n.type] ?? TYPE_COLOR.other).multiplyScalar(0.8);
-      inst.setColorAt(i, c);
-    });
     const m4 = new THREE.Matrix4();
     const setScales = (disp: number) => {
       nodes.forEach((n, i) => {
@@ -147,6 +145,23 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
       });
       inst.instanceMatrix.needsUpdate = true;
     };
+    // first view: the first story's neighbourhood is drawn at once, the rest of the graph fades in over under a second
+    const hood = new Set<number>(props.current.stories[0].after.nodes.map((n) => byId.get(n.id) ? nodes.indexOf(byId.get(n.id)!) : -1).filter((k) => k >= 0));
+    for (let hop = 0; hop < 2; hop++) for (const [a, b] of linkEnds) { if (hood.has(a)) hood.add(b); else if (hood.has(b)) hood.add(a); }
+    const nodeCol = nodes.map((n) => new THREE.Color(TYPE_COLOR[n.type] ?? TYPE_COLOR.other).multiplyScalar(0.8));
+    const baseLine = Float32Array.from(lineCol);
+    const applyFade = (f: number) => {
+      linkEnds.forEach(([a, b], i) => {
+        const k = hood.has(a) || hood.has(b) ? 1 : f;
+        for (let j = 0; j < 6; j++) lineCol[i * 6 + j] = baseLine[i * 6 + j] * k;
+      });
+      lg.getAttribute("color").needsUpdate = true;
+      const c = new THREE.Color();
+      nodes.forEach((_, i) => inst.setColorAt(i, c.copy(nodeCol[i]).multiplyScalar(hood.has(i) ? 1 : f)));
+      inst.instanceColor!.needsUpdate = true;
+    };
+    applyFade(0);
+    let fadeStart = -1, fadeDone = false;
     setScales(0);
     const world = new THREE.Group();
     world.add(lines, inst);
@@ -276,7 +291,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
 
     // ---- per-frame ----
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let disp = 0;
+    let disp = countByIter[0]; // the starting graph is there from the first frame
     let lastDispRounded = -1;
     let t0 = performance.now(), last = t0, storyIdx = -1, storyStart = 0, lastEmit = "", frames = 0, fpsT = last, curveIter = 0, graphIter = 0, lastMode = "";
     let raf = 0;
@@ -302,6 +317,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
         frames = 0;
         fpsT = now;
       }
+      if (frames === 1 && !performance.getEntriesByName("gb-first-frame").length) performance.mark("gb-first-frame");
       const { mode: md, iter: it, stories: ss } = props.current;
       const t = (now - t0) / 1000;
       let wantC = wideC, wantD = wideR * 1.75;
@@ -427,6 +443,13 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
       }
       lastMode = md;
 
+      if (!fadeDone) {
+        if (fadeStart < 0) fadeStart = now;
+        const f = ease((now - fadeStart) / 900);
+        applyFade(f);
+        if (f >= 1) fadeDone = true;
+      }
+
       // base layer: reveal links up to the current iteration, a few at a time
       const target = countByIter[Math.min(5, Math.max(0, Math.round(graphIter)))];
       const speed = Math.max(40, Math.abs(target - disp) * 2.2);
@@ -475,7 +498,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
           ref={fgRef}
           width={size.w}
           height={size.h}
-          graphData={data.current}
+          graphData={EMPTY}
           backgroundColor="rgba(0,0,0,0)"
           controlType="orbit"
           showNavInfo={false}
@@ -486,12 +509,6 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
           nodeThreeObject={() => new THREE.Object3D()}
           warmupTicks={0}
           cooldownTicks={0}
-          d3AlphaDecay={0.02}
-          d3VelocityDecay={0.35}
-          onEngineStop={() => {
-            if (!ready) setReady(true);
-          }}
-          onEngineTick={() => {}}
           rendererConfig={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         />
       )}
