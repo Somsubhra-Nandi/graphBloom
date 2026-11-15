@@ -25,6 +25,14 @@ def check(name, ok, detail=""):
     print(f"{'PASS' if ok else 'FAIL'}  {name}" + (f"  [{detail}]" if detail else ""))
 
 
+skipped = []
+
+
+def skip(name, why):
+    skipped.append(name)
+    print(f"SKIP  {name}  [{why}]")
+
+
 def sha(p):
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()[:16]
 
@@ -32,14 +40,17 @@ def sha(p):
 # 1. the split regenerates byte-for-byte from seed 42
 import make_split  # noqa: E402
 
-orig = {f: sha(config.SPLIT_DIR / f) for f in ("feedback.jsonl", "heldout.jsonl", "corpus.jsonl")}
-with tempfile.TemporaryDirectory() as d:
-    make_split.OUT = Path(d)
-    sys.stdout = open("/dev/null", "w")
-    make_split.main()
-    sys.stdout = sys.__stdout__
-    again = {f: sha(Path(d) / f) for f in orig}
-check("split files regenerate identically from seed 42", orig == again, json.dumps(orig))
+if not (config.ROOT / make_split.DEV).exists():
+    skip("split files regenerate identically from seed 42", f"needs the benchmark download at {make_split.DEV}; not part of the replay bundle")
+else:
+    orig = {f: sha(config.SPLIT_DIR / f) for f in ("feedback.jsonl", "heldout.jsonl", "corpus.jsonl")}
+    with tempfile.TemporaryDirectory() as d:
+        make_split.OUT = Path(d)
+        sys.stdout = open("/dev/null", "w")
+        make_split.main()
+        sys.stdout = sys.__stdout__
+        again = {f: sha(Path(d) / f) for f in orig}
+    check("split files regenerate identically from seed 42", orig == again, json.dumps(orig))
 
 # 2. every stored score recomputes from the stored prediction and gold; summaries recompute from the rows
 bad, files = 0, 0
@@ -86,7 +97,8 @@ if live.get("snapshot") == "learned_iter5":
         return res
 
     llm.call = cache_only
-    schema = ActiveSchema.load(config.RUNS_DIR / "learned" / "schema.json")
+    schema_path = config.RUNS_DIR / "learned" / "schema.json"  # absent in a fresh clone: rebuilt from the committed run state
+    schema = ActiveSchema.load(schema_path) if schema_path.exists() else ActiveSchema.from_run_state(json.loads((R / "learned" / "state.json").read_text()))
     eng = QueryEngine(Graph(schema=schema), phase="learning", schema=schema)
     stored_rows = {r["id"]: r for r in map(json.loads, open(R / "learned/iter5/heldout.jsonl"))}
     diff = miss = 0
@@ -118,6 +130,7 @@ check("classifier never opens heldout.jsonl", "heldout" not in src.replace("neve
 led = json.loads((config.STATE_DIR / "spend.json").read_text())
 check("spend ledger: phases sum to the total and stay under budget", abs(sum(led["by_phase"].values()) - led["total"]) < 1e-3 and led["total"] < config.BUDGET_TOTAL_USD and led["by_phase"].get("reserve", 0) == 0, f"total ${led['total']:.4f}, reserve $0")
 
-(R / "reproducibility.json").write_text(json.dumps(checks, indent=1))
-print(f"\n{sum(c['pass'] for c in checks)}/{len(checks)} checks passed")
+if not skipped:  # a partial run must not overwrite the committed record of the full one
+    (R / "reproducibility.json").write_text(json.dumps(checks, indent=1))
+print(f"\n{sum(c['pass'] for c in checks)}/{len(checks)} checks passed" + (f", {len(skipped)} skipped" if skipped else ""))
 sys.exit(0 if all(c["pass"] for c in checks) else 1)
