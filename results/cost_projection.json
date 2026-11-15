@@ -1,0 +1,291 @@
+{
+ "note": "Arithmetic on measured token counts, $0. Ingest ran through the Message Batches API at 50% price; query-time extraction needs an answer now, so it is priced at the normal rate.",
+ "model": "claude-haiku-4-5-20251001",
+ "price_per_mtok": {
+  "input": 1.0,
+  "output": 5.0,
+  "batch_discount": 0.5
+ },
+ "measured_shallow_ingest": {
+  "chunks": 1748,
+  "input_tokens_per_chunk": 1190,
+  "output_tokens_per_chunk": 179,
+  "usd_per_chunk": {
+   "normal": 0.002084,
+   "batch": 0.001042
+  },
+  "usd_total": {
+   "normal": 3.6427,
+   "batch": 1.8213
+  }
+ },
+ "full_extraction_model": {
+  "relations": 22,
+  "input_tokens_per_chunk": 1574,
+  "tokens_per_char": 0.2456,
+  "output_multiplier": 1.605,
+  "output_multiplier_basis": "gold evidence of the 150 feedback questions: 233 triples in the 8 seed relations, 141 more in the 14 pool relations",
+  "output_tokens_per_chunk": 287,
+  "usd_per_chunk": {
+   "normal": 0.003008,
+   "batch": 0.001504
+  },
+  "usd_per_chunk_if_output_does_not_grow": {
+   "normal": 0.002468,
+   "batch": 0.001234
+  }
+ },
+ "ours": {
+  "learned_one_time_usd": 1.7595,
+  "per_1000_queries_usd": {
+   "ours_recurring": 4.21,
+   "ours_extraction_part": 1.07,
+   "full_extraction_recurring": 3.16
+  },
+  "learned_cost_assumption": "held constant with corpus size: it depends on the 150 feedback questions and the repair chunks they touch, not on how many documents exist"
+ },
+ "projection": [
+  {
+   "documents": 1748,
+   "full_extraction_22_relations": {
+    "normal": 5.2588,
+    "batch": 2.6294,
+    "batch_if_output_does_not_grow": 2.1566
+   },
+   "shallow_ingest_8_relations": {
+    "normal": 3.6427,
+    "batch": 1.8213
+   },
+   "extra_for_the_14_relations_in_one_pass": {
+    "normal": 1.6162,
+    "batch": 0.8081
+   }
+  },
+  {
+   "documents": 100000,
+   "full_extraction_22_relations": {
+    "normal": 300.85,
+    "batch": 150.42,
+    "batch_if_output_does_not_grow": 123.38
+   },
+   "shallow_ingest_8_relations": {
+    "normal": 208.39,
+    "batch": 104.19
+   },
+   "extra_for_the_14_relations_in_one_pass": {
+    "normal": 92.46,
+    "batch": 46.23
+   }
+  },
+  {
+   "documents": 1000000,
+   "full_extraction_22_relations": {
+    "normal": 3008.47,
+    "batch": 1504.24,
+    "batch_if_output_does_not_grow": 1233.78
+   },
+   "shallow_ingest_8_relations": {
+    "normal": 2083.9,
+    "batch": 1041.95
+   },
+   "extra_for_the_14_relations_in_one_pass": {
+    "normal": 924.57,
+    "batch": 462.29
+   }
+  }
+ ],
+ "totals": [
+  {
+   "documents": 1748,
+   "queries": 1000,
+   "full_extraction_total": 5.7894,
+   "ours_total": 7.7908
+  },
+  {
+   "documents": 1748,
+   "queries": 10000,
+   "full_extraction_total": 34.23,
+   "ours_total": 45.68
+  },
+  {
+   "documents": 1748,
+   "queries": 100000,
+   "full_extraction_total": 318.63,
+   "ours_total": 424.58
+  },
+  {
+   "documents": 1748,
+   "queries": 1000000,
+   "full_extraction_total": 3162.63,
+   "ours_total": 4213.58
+  },
+  {
+   "documents": 100000,
+   "queries": 1000,
+   "full_extraction_total": 153.58,
+   "ours_total": 110.16
+  },
+  {
+   "documents": 100000,
+   "queries": 10000,
+   "full_extraction_total": 182.02,
+   "ours_total": 148.05
+  },
+  {
+   "documents": 100000,
+   "queries": 100000,
+   "full_extraction_total": 466.42,
+   "ours_total": 526.95
+  },
+  {
+   "documents": 100000,
+   "queries": 1000000,
+   "full_extraction_total": 3310.42,
+   "ours_total": 4315.95
+  },
+  {
+   "documents": 1000000,
+   "queries": 1000,
+   "full_extraction_total": 1507.4,
+   "ours_total": 1047.92
+  },
+  {
+   "documents": 1000000,
+   "queries": 10000,
+   "full_extraction_total": 1535.84,
+   "ours_total": 1085.81
+  },
+  {
+   "documents": 1000000,
+   "queries": 100000,
+   "full_extraction_total": 1820.24,
+   "ours_total": 1464.71
+  },
+  {
+   "documents": 1000000,
+   "queries": 1000000,
+   "full_extraction_total": 4664.24,
+   "ours_total": 5253.71
+  }
+ ],
+ "break_even_queries": {
+  "1748": 0,
+  "100000": 42351,
+  "1000000": 438596
+ },
+ "scaling": [
+  {
+   "documents": 1748,
+   "full_extra_batch": 0.8081
+  },
+  {
+   "documents": 2277,
+   "full_extra_batch": 1.0526
+  },
+  {
+   "documents": 2967,
+   "full_extra_batch": 1.3716
+  },
+  {
+   "documents": 3866,
+   "full_extra_batch": 1.7872
+  },
+  {
+   "documents": 5036,
+   "full_extra_batch": 2.3281
+  },
+  {
+   "documents": 6562,
+   "full_extra_batch": 3.0335
+  },
+  {
+   "documents": 8549,
+   "full_extra_batch": 3.9521
+  },
+  {
+   "documents": 11138,
+   "full_extra_batch": 5.1489
+  },
+  {
+   "documents": 14511,
+   "full_extra_batch": 6.7082
+  },
+  {
+   "documents": 18906,
+   "full_extra_batch": 8.74
+  },
+  {
+   "documents": 24631,
+   "full_extra_batch": 11.39
+  },
+  {
+   "documents": 32091,
+   "full_extra_batch": 14.84
+  },
+  {
+   "documents": 41809,
+   "full_extra_batch": 19.33
+  },
+  {
+   "documents": 54471,
+   "full_extra_batch": 25.18
+  },
+  {
+   "documents": 70967,
+   "full_extra_batch": 32.81
+  },
+  {
+   "documents": 92460,
+   "full_extra_batch": 42.74
+  },
+  {
+   "documents": 120461,
+   "full_extra_batch": 55.69
+  },
+  {
+   "documents": 156943,
+   "full_extra_batch": 72.55
+  },
+  {
+   "documents": 204473,
+   "full_extra_batch": 94.52
+  },
+  {
+   "documents": 266397,
+   "full_extra_batch": 123.15
+  },
+  {
+   "documents": 347075,
+   "full_extra_batch": 160.45
+  },
+  {
+   "documents": 452187,
+   "full_extra_batch": 209.04
+  },
+  {
+   "documents": 589131,
+   "full_extra_batch": 272.35
+  },
+  {
+   "documents": 767549,
+   "full_extra_batch": 354.83
+  },
+  {
+   "documents": 1000000,
+   "full_extra_batch": 462.29
+  }
+ ],
+ "ours_extra_by_queries": {
+  "1000": 2.8095,
+  "10000": 12.26,
+  "100000": 106.76,
+  "1000000": 1051.76
+ },
+ "caveats": [
+  "The corpus is 1,748 short single-paragraph chunks; 100k and 1M documents are scaled linearly from the measured per-chunk cost.",
+  "Both approaches pay the shallow ingest: the shallow pass is most of the cost of a full pass, because the paragraph text dominates the input.",
+  "The output multiplier is an estimate from gold evidence counts, not a measurement; the lower bound with no output growth is also given.",
+  "Query-time extraction is priced per question; repeated questions about the same entities reuse earlier extractions, so the per-question figure is an upper estimate for repeated topics.",
+  "Full extraction is shown as the 22 relations in a single pass. It also has no query-time extraction, so its per-query cost is planner plus answer only."
+ ]
+}
