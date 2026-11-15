@@ -1,6 +1,9 @@
-export type GNode = { id: number; name: string; type: string; created_iter: number; degree: number; x?: number; y?: number; z?: number };
-export type GLink = { source: number | GNode; target: number | GNode; type: string; created_iter: number };
-export type GraphData = { nodes: GNode[]; links: GLink[]; counts: { entities: number; edges: number; isolated: number; edges_by_iter: Record<string, number> } };
+export type GNode = { id: number; type: string; x: number; y: number; z: number; degree: number };
+// columns, one entry per drawn entity; l is [from, to, created_iter] by position in those columns
+export type GraphData = {
+  i: number[]; t: number[]; types: string[]; x: number[]; y: number[]; z: number[]; l: [number, number, number][];
+  counts: { entities: number; edges: number; isolated: number; edges_by_iter: Record<string, number> };
+};
 export type Series = { key: string; label: string; em: number[]; ci95: number[][]; cost_usd: number | null };
 export type Baseline = { key: string; label: string; em: number; ci95: number[] };
 export type Curve = { n_questions: number; iterations: number[]; series: Series[]; baselines: Baseline[] };
