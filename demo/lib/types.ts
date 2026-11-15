@@ -13,8 +13,18 @@ export type Story = {
 };
 export type CostRow = { key: string; label: string; one_time_usd: number; recurring_usd: number; total_usd: number; parts: { planner: number; answer: number; query_time_extraction: number }; em: number };
 export type Lat = { n: number; p50_ms: number; p95_ms: number; max_ms: number; errors: number };
+export type Projection = {
+  scaling: { documents: number; full_extra_batch: number }[];
+  ours_extra_by_queries: Record<string, number>;
+  totals: { documents: number; queries: number; full_extraction_total: number; ours_total: number }[];
+  break_even_queries: Record<string, number>;
+  ours: { learned_one_time_usd: number };
+  full_extraction_model: { usd_per_chunk: { batch: number; normal: number } };
+  measured_shallow_ingest: { usd_per_chunk: { batch: number; normal: number } };
+};
 export type Metrics = {
   load_test: { concurrent_queries: number; duration_s: number; quiet: Lat; busy: Lat & { rounds: number }; writer: { nodes_written: number; edges_written: number; nodes_per_second: number }; windows: { seconds: string; queries: number; read_p50_ms: number; read_p95_ms: number }[]; note: string };
+  projection: Projection;
   cost: { per_1000_queries: CostRow[]; learning_total_usd: number; match_iteration: number; note: string };
 };
 export type StageState = { story: number; phase: string; graphIter: number; curveIter: number };
