@@ -2,7 +2,7 @@
 
 A knowledge graph that starts shallow and learns which facts it is missing from the questions it gets wrong, so it only pays to extract what people actually ask about.
 
-Demo: https://demo-41l56zfw1-na-d5c0.vercel.app/
+Demo: https://graphbloom.vercel.app
 
 ## Result
 
