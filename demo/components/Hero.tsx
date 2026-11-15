@@ -86,11 +86,11 @@ export default function Hero() {
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 p-5 sm:p-8">
         <p className="text-sm font-medium tracking-wide text-muted-foreground">GraphBloom</p>
-        <h1 className="mt-2 max-w-xl text-3xl font-semibold leading-[1.08] sm:text-5xl" style={{ fontStretch: "92%" }}>
+        <h1 className="mt-2 max-w-xl text-balance text-3xl font-semibold leading-[1.08] tracking-tight sm:text-5xl" style={{ fontStretch: "92%" }}>
           A knowledge graph that finds out which facts it is missing.
         </h1>
-        <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-          Every dot is a thing from the documents, every line a fact. Watch it fail a question, learn the missing fact, and get it right.
+        <p className="mt-3 max-w-md text-pretty text-base leading-relaxed text-muted-foreground">
+          Each dot is something named in the documents; each line is a fact about it. Watch it fail a question, learn the missing fact, and get the answer right.
         </p>
       </header>
 
@@ -128,8 +128,8 @@ export default function Hero() {
 
           <div className="mx-auto w-full max-w-md rounded-xl border border-border bg-card/85 p-4 backdrop-blur-md">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <Button size="sm" onClick={replay}>Replay learning</Button>
-              {mode === "replay" && <button className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline" onClick={backToStories}>Back to examples</button>}
+              <Button onClick={replay}>Replay learning</Button>
+              {mode === "replay" && <button className="-mr-2 rounded-md px-2 py-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-primary" onClick={backToStories}>Back to examples</button>}
             </div>
             <Slider min={0} max={5} step={1} value={[shownIter]} onValueChange={(v) => { stop(); setMode("replay"); setIter(Array.isArray(v) ? v[0] : v); }} aria-label="Learning iteration" />
             <div className="mt-2 flex justify-between text-xs text-muted-foreground tnum">
