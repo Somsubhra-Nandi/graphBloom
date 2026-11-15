@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import GraphStage from "@/components/GraphStage";
 import MiniCurve from "@/components/MiniCurve";
+import MobileHero from "@/components/MobileHero";
 import type { Curve, GraphData, Mutation, StageState, Story } from "@/lib/types";
 
-type Data = { graph: GraphData; stories: Story[]; curve: Curve; mutations: Mutation[] };
+type Data = { graph: GraphData | null; stories: Story[]; curve: Curve; mutations: Mutation[] };
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
@@ -34,12 +35,17 @@ export default function Hero() {
   const [iter, setIter] = useState(0);
   const [st, setSt] = useState<StageState>({ story: 0, phase: "question", graphIter: 0, curveIter: 0 });
   const [ready, setReady] = useState(false);
+  const [narrow, setNarrow] = useState<boolean | null>(null);
   const [showFps, setShowFps] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setShowFps(new URLSearchParams(location.search).has("fps"));
-    Promise.all(["graph", "stories", "curve", "mutations"].map((n) => fetch(`data/${n}.json`).then((r) => r.json())))
+    const small = window.matchMedia("(max-width: 767px)").matches;
+    setNarrow(small);
+    const get = (n: string) => fetch(`data/${n}.json`).then((r) => r.json());
+    // phones skip the 500 KB graph file: they get a still frame instead
+    Promise.all([small ? Promise.resolve(null) : get("graph"), get("stories"), get("curve"), get("mutations")])
       .then(([graph, stories, curve, mutations]) => setData({ graph, stories, curve, mutations }))
       .catch(() => setErr(true));
   }, []);
@@ -61,10 +67,12 @@ export default function Hero() {
   const backToStories = () => { stop(); setMode("story"); };
   const onState = useCallback((s: StageState) => setSt(s), []);
 
+  if (narrow && data) return <MobileHero story={data.stories[0]} curve={data.curve} />;
+
   const added = (it: number) => data?.mutations.filter((m) => m.kind === "schema_growth" && m.iteration === it).map((m) => m.relation) ?? [];
   const linksAt = (it: number) => {
     if (!data) return 0;
-    const by = data.graph.counts.edges_by_iter;
+    const by = data.graph?.counts.edges_by_iter ?? {};
     return Object.entries(by).filter(([k]) => +k <= it).reduce((a, [, v]) => a + v, 0);
   };
 
@@ -74,7 +82,7 @@ export default function Hero() {
 
   return (
     <section className="relative h-[100svh] min-h-[680px] w-full overflow-hidden bg-[radial-gradient(ellipse_at_50%_40%,#111826_0%,#090c12_70%)]">
-      {data && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} onReady={() => setReady(true)} showFps={showFps} />}
+      {data && data.graph && <GraphStage graph={data.graph} stories={data.stories} mode={mode} iter={iter} onState={onState} onReady={() => setReady(true)} showFps={showFps} />}
 
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 p-5 sm:p-8">
         <p className="text-sm font-medium tracking-wide text-muted-foreground">GraphBloom</p>
@@ -87,7 +95,7 @@ export default function Hero() {
       </header>
 
       {!ready && !err && (
-        <div className="absolute inset-0 z-10 grid place-items-center text-sm text-muted-foreground">Laying out {data ? data.graph.counts.entities - data.graph.counts.isolated : ""} entities…</div>
+        <div className="absolute inset-0 z-10 grid place-items-center text-sm text-muted-foreground">Laying out {data?.graph ? data.graph.counts.entities - data.graph.counts.isolated : ""} entities…</div>
       )}
       {err && <div className="absolute inset-0 z-10 grid place-items-center text-sm text-destructive">The data files could not be loaded. Run scripts/export_demo.py and rebuild.</div>}
 
