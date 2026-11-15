@@ -91,14 +91,25 @@ At our own 1,748 documents, extracting everything is cheaper. Ours is cheaper pa
 
 Everything below needs Python 3.13, Docker, and `pip install -r requirements.txt`. The graph database is HydraDB 0.4.0 in a local container (`scripts/start_hydradb.sh`).
 
-**At $0, from the cache.** Every model call was cached by its exact input, so a rerun costs nothing.
+**At $0, from the replay bundle (no API key).** Every model call was cached by its exact input, and the bundle holds that cache and the saved final graph, so the replay makes no API calls and spends nothing. The bundle is `replay-bundle.zip`, an asset of the [v1.0 release](https://github.com/Somsubhra-Nandi/graphBloom/releases/tag/v1.0).
 
 ```bash
-.venv/bin/python scripts/snapshot.py restore learned_iter5   # the saved final graph
-.venv/bin/python scripts/reproduce.py                        # 10 checks, no spend
+# 1. download the bundle from the v1.0 release and unzip it at the repo root
+curl -L -o replay-bundle.zip https://github.com/Somsubhra-Nandi/graphBloom/releases/download/v1.0/replay-bundle.zip
+unzip replay-bundle.zip                 # creates .cache/llm and data/snapshots/learned_iter5
+
+# 2. Python environment (3.13)
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+# 3. start HydraDB (local container) and restore the saved final graph
+scripts/start_hydradb.sh
+.venv/bin/python scripts/snapshot.py restore learned_iter5   # checks 3,791 entities and 2,718 links
+
+# 4. re-run the replay checks
+.venv/bin/python scripts/reproduce.py
 ```
 
-The checks regenerate the split from seed 42, recompute every EM and F1 from the stored predictions, rebuild `results/curve.json` and the paired intervals, and replay the iteration-5 predictions from the saved graph and cache. The cache (`.cache/`, 19 MB) and graph snapshots (`data/snapshots/`) are not in the repository, so a fresh clone can run only the checks that read `results/` and the benchmark download; the replay needs the cache and snapshot from the original run.
+Expected end of the output: `9/9 checks passed, 1 skipped`. The checks recompute every EM and F1 from the stored predictions, rebuild `results/curve.json` and the paired intervals, and replay the 87 held-out questions through the restored graph and the cache, which must give the stored iteration-5 predictions with 0 differing and 0 cache misses. The one skipped check regenerates the data split from seed 42 and needs the benchmark download at `data/raw/dev.json`; with that file in place all 10 run. `.env` is not needed.
 
 **On your own documents.**
 
