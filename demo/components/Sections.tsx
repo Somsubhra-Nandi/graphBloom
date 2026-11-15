@@ -21,9 +21,9 @@ function useWidth(initial = 640) {
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
-function Block({ title, sentence, number, unit, children, note }: { title: string; sentence: string; number: string; unit: string; children: React.ReactNode; note?: string }) {
+function Block({ id, title, sentence, number, unit, children, note }: { id?: string; title: string; sentence: string; number: string; unit: string; children: React.ReactNode; note?: string }) {
   return (
-    <section className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16 lg:py-28">
+    <section id={id} className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16 lg:py-28">
       <div>
         <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{title}</h2>
         <p className="mt-4 max-w-sm text-pretty text-[17px] leading-relaxed text-muted-foreground">{sentence}</p>
@@ -52,6 +52,7 @@ export function CurveSection({ curve }: { curve: Curve }) {
   const tag = (yy: number, text: string, fill: string, weight = 400) => <text x={x(5) + 10} y={yy} fontSize={narrow ? 12 : 13} fill={fill} fontWeight={weight} dominantBaseline="middle">{text}</text>;
   return (
     <Block
+      id="curve"
       title="Gets better as it's used"
       sentence={`Each round, it studies the questions it got wrong and adds only the links they were missing. Scored on ${curve.n_questions} questions it never trained on.`}
       number={`${pct(learned.em[0])} → ${pct(learned.em[5])}`}
@@ -114,6 +115,7 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
   const draw = { initial: { pathLength: 0 }, whileInView: { pathLength: 1 }, viewport: { once: true, margin: "-5%" }, transition: { duration: 1.4, ease: "easeOut" as const } };
   return (
     <Block
+      id="cost"
       title="Pays only for what's asked"
       sentence="Extracting every relation from every document costs more as the library grows. Ours costs more as the questions grow."
       number={`${Math.round(saving * 100)}% less`}
@@ -151,7 +153,7 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
       </div>
       <p className="mt-2 text-[13px] leading-snug text-muted-foreground">Extra cost of the 14 relations beyond the shallow first pass. White: extract all 22 relations up front, which grows with documents. Green: extract only what questions need, which grows with questions asked and not with documents.</p>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+      <div id="who-for" className="mt-8 grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-[15px] font-semibold text-primary">Who it is for</p>
           <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">Large collections where most documents are rarely asked about: legal discovery, enterprise archives, research libraries.</p>
@@ -183,6 +185,7 @@ export function LatencySection({ lt }: { lt: Metrics["load_test"] }) {
   const max = 240;
   return (
     <Block
+      id="latency"
       title="Fast under load"
       sentence={`${lt.concurrent_queries} questions at once, while ${lt.writer.nodes_per_second.toLocaleString()} new facts a second are written into the same graph, for two minutes.`}
       number={`${lt.busy.p95_ms} ms`}
@@ -233,7 +236,7 @@ export function HowItWorks({ before, after }: { before: number; after: number })
     <g key="d"><path d="M16 46L44 36L72 28L104 14" stroke="var(--primary)" strokeWidth="2.5" fill="none" /><circle cx="104" cy="14" r="5" fill="var(--primary)" /><path d="M16 50H104" stroke={g} strokeDasharray="3 4" /></g>,
   ];
   return (
-    <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20 lg:py-28">
+    <section id="how" className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20 lg:py-28">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16">
         <div>
           <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">How it works</h2>

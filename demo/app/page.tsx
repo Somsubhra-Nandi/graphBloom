@@ -15,7 +15,7 @@ export default function Page() {
       <CostSection metrics={metrics} />
       <LatencySection lt={metrics.load_test} />
       <HowItWorks before={8} after={8 + grown} />
-      <section className="mx-auto max-w-6xl px-5 pb-10 sm:px-8">
+      <section id="pilot" className="mx-auto max-w-6xl px-5 pb-10 sm:px-8">
         <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-lg font-semibold">Roadmap</p>
