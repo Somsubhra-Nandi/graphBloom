@@ -133,7 +133,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
     const nodes = data.current.nodes;
     const inst = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85 }), nodes.length);
     inst.frustumCulled = false;
-    const radius = nodes.map((n) => Math.min(2, 0.4 + Math.sqrt(n.degree) * 0.14));
+    const radius = nodes.map((n) => Math.min(1.3, 0.4 + Math.sqrt(n.degree) * 0.14));
     nodes.forEach((n, i) => {
       const c = new THREE.Color(TYPE_COLOR[n.type] ?? TYPE_COLOR.other).multiplyScalar(0.8);
       inst.setColorAt(i, c);
@@ -275,6 +275,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
     controls.target.copy(wideC);
 
     // ---- per-frame ----
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let disp = 0;
     let lastDispRounded = -1;
     let t0 = performance.now(), last = t0, storyIdx = -1, storyStart = 0, lastEmit = "", frames = 0, fpsT = last, curveIter = 0, graphIter = 0, lastMode = "";
@@ -441,7 +442,7 @@ export default function GraphStage({ graph, stories, mode, iter, onState, onRead
       // camera easing
       if (now > userUntil) {
         if (userUntil !== 0) { camT.copy(controls.target); camPos.copy(camera.position); dist = camPos.distanceTo(camT); userUntil = 0; }
-        ang += dt * 0.07;
+        ang += reduceMotion ? 0 : dt * 0.07;
         const k = 1 - Math.exp(-dt * 1.6);
         camT.lerp(wantC, k);
         dist += (wantD - dist) * k;
