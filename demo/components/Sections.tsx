@@ -1,20 +1,36 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import type { Curve, Metrics } from "@/lib/types";
+
+// the chart is drawn at its real pixel width, so text stays readable on a phone
+function useWidth(initial = 640) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(initial);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setW(Math.round(el.clientWidth)));
+    ro.observe(el);
+    setW(Math.round(el.clientWidth));
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w] as const;
+}
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 function Block({ title, sentence, number, unit, children, note }: { title: string; sentence: string; number: string; unit: string; children: React.ReactNode; note?: string }) {
   return (
-    <section className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16 lg:py-28">
+    <section className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16 lg:py-28">
       <div>
         <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">{title}</h2>
         <p className="mt-4 max-w-sm text-[17px] leading-relaxed text-muted-foreground">{sentence}</p>
         <p className="mt-8 text-6xl font-semibold tracking-tight text-primary tnum sm:text-7xl">{number}</p>
         <p className="mt-1 text-sm text-muted-foreground">{unit}</p>
       </div>
-      <div>
+      <div className="min-w-0">
         {children}
         {note && <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground">{note}</p>}
       </div>
@@ -23,7 +39,9 @@ function Block({ title, sentence, number, unit, children, note }: { title: strin
 }
 
 export function CurveSection({ curve }: { curve: Curve }) {
-  const W = 640, H = 340, L = 44, R = 150, T = 16, B = 34;
+  const [box, W] = useWidth();
+  const narrow = W < 520;
+  const H = narrow ? 280 : 340, L = 40, R = narrow ? 104 : 150, T = 16, B = 34;
   const lo = 0.2, hi = 0.65;
   const x = (i: number) => L + (i / 5) * (W - L - R);
   const y = (v: number) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
@@ -31,7 +49,7 @@ export function CurveSection({ curve }: { curve: Curve }) {
   const learned = curve.series[0], randoms = curve.series.slice(1);
   const stat = curve.baselines.find((b) => b.key === "static_graph")!, bm = curve.baselines.find((b) => b.key === "bm25")!, ov = curve.baselines.find((b) => b.key === "open_vocab")!;
   const draw = { initial: { pathLength: 0 }, whileInView: { pathLength: 1 }, viewport: { once: true, margin: "-5%" }, transition: { duration: 1.6, ease: "easeOut" as const } };
-  const tag = (yy: number, text: string, fill: string, weight = 400) => <text x={x(5) + 10} y={yy} fontSize={13} fill={fill} fontWeight={weight} dominantBaseline="middle">{text}</text>;
+  const tag = (yy: number, text: string, fill: string, weight = 400) => <text x={x(5) + 10} y={yy} fontSize={narrow ? 12 : 13} fill={fill} fontWeight={weight} dominantBaseline="middle">{text}</text>;
   return (
     <Block
       title="Gets better as it's used"
@@ -40,7 +58,8 @@ export function CurveSection({ curve }: { curve: Curve }) {
       unit="questions answered exactly right, before and after five rounds"
       note={`Choosing the missing links at random also helps (${pct(randoms[0].em[5])} and ${pct(randoms[1].em[5])}), so most of the gain comes from adding the right kind of link at all; learning from failures gets there faster. A version told the right link types up front scored ${pct(ov.em)}, which is within the noise of ${pct(learned.em[5])} at this sample size.`}
     >
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Held-out accuracy per iteration for learned, random, static and BM25">
+      <div ref={box}>
+      <svg width={W} height={H + 4} className="block" role="img" aria-label="Held-out accuracy per iteration for learned, random, static and BM25">
         {[0.2, 0.3, 0.4, 0.5, 0.6].map((g) => (
           <g key={g}>
             <line x1={L} x2={W - R} y1={y(g)} y2={y(g)} stroke="#1f2837" />
@@ -60,8 +79,8 @@ export function CurveSection({ curve }: { curve: Curve }) {
         {tag(y(ov.em) - 1, "Told up front", "#e8ebf1")}
         {tag(y(stat.em) + 6, "Never learns", "#8b95a7")}
         {tag(y(bm.em), "Keyword search", "#8b95a7")}
-        <text x={L} y={H - 22} fontSize={0} />
       </svg>
+      </div>
       <p className="mt-1 text-xs text-muted-foreground">Horizontal axis: learning iteration. Vertical axis: exact-match accuracy on held-out questions.</p>
     </Block>
   );
@@ -79,16 +98,18 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
   const saving = 1 - head.ours_total / head.full_extraction_total;
   const crossDocs = Math.round(pr.ours_extra_by_queries["10000"] / (pr.scaling[24].full_extra_batch / pr.scaling[24].documents) / 1000) * 1000;
 
-  const W = 640, H = 340, L = 56, R = 120, T = 14, B = 40;
+  const [box, W] = useWidth();
+  const narrow = W < 520;
+  const H = narrow ? 290 : 340, L = 50, R = narrow ? 92 : 124, T = 14, B = 40;
   const x0 = Math.log10(pr.scaling[0].documents), x1 = Math.log10(1_000_000);
   const y0 = Math.log10(0.5), y1 = Math.log10(2000);
   const x = (d: number) => L + ((Math.log10(d) - x0) / (x1 - x0)) * (W - L - R);
   const y = (v: number) => T + (1 - (Math.log10(v) - y0) / (y1 - y0)) * (H - T - B);
   const full = pr.scaling.map((p, i) => `${i ? "L" : "M"}${x(p.documents)},${y(p.full_extra_batch)}`).join(" ");
   const qs: { q: string; label: string; accent: boolean }[] = [
-    { q: "10000", label: "10,000 questions", accent: true },
-    { q: "100000", label: "100,000", accent: false },
-    { q: "1000000", label: "1,000,000", accent: false },
+    { q: "10000", label: "10k questions", accent: true },
+    { q: "100000", label: "100k", accent: false },
+    { q: "1000000", label: "1M", accent: false },
   ];
   const draw = { initial: { pathLength: 0 }, whileInView: { pathLength: 1 }, viewport: { once: true, margin: "-5%" }, transition: { duration: 1.4, ease: "easeOut" as const } };
   return (
@@ -99,7 +120,8 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
       unit={`than extracting everything first, for ${(10_000).toLocaleString()} questions over 1 million documents (${usd(head.ours_total)} against ${usd(head.full_extraction_total)})`}
       note={`The chart counts only the extra cost of the 14 relations the first pass skips; both approaches pay for the same shallow first pass. At our own ${pr.scaling[0].documents.toLocaleString()} documents, extracting everything up front is cheaper. Ours pulls ahead past roughly ${crossDocs.toLocaleString()} documents at 10,000 questions, and falls behind once the questions asked exceed about ${(Math.round(pr.break_even_queries["1000000"] / 1000) * 1000).toLocaleString()} over 1 million documents. Projected linearly from measured costs, using the cheaper batch rate for ingest.`}
     >
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Extra extraction cost as the number of documents grows, for full extraction and for question-driven extraction">
+      <div ref={box}>
+      <svg width={W} height={H + 4} className="block" role="img" aria-label="Extra extraction cost as the number of documents grows, for full extraction and for question-driven extraction">
         {[1, 10, 100, 1000].map((g) => (
           <g key={g}>
             <line x1={L} x2={W - R} y1={y(g)} y2={y(g)} stroke="#1f2837" />
@@ -126,6 +148,7 @@ export function CostSection({ metrics }: { metrics: Metrics }) {
           return <g key={d}><circle cx={x(d)} cy={y(v)} r={4} fill="#e8ebf1" /><text x={x(d) - 8} y={y(v) - 10} textAnchor="end" fontSize={12} fill="#e8ebf1">{usd(v)}</text></g>;
         })}
       </svg>
+      </div>
       <p className="mt-1 text-xs text-muted-foreground">Extra cost of the 14 relations beyond the shallow first pass. White: extract all 22 relations up front, which grows with documents. Green: extract only what questions need, which grows with questions asked and not with documents.</p>
 
       <div className="mt-8 rounded-xl border border-border bg-card p-4">
@@ -170,9 +193,9 @@ export function LatencySection({ lt }: { lt: Metrics["load_test"] }) {
         ))}
         <div>
           <p className="mb-2 text-sm text-muted-foreground">Slowest 5%, in each 30 seconds of the writing test</p>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {lt.windows.map((w) => (
-              <div key={w.seconds} className="flex-1 rounded-md border border-border px-3 py-2 text-center">
+              <div key={w.seconds} className="rounded-md border border-border px-3 py-2 text-center">
                 <div className="tnum text-base font-medium">{w.read_p95_ms} ms</div>
                 <div className="text-xs text-muted-foreground">{w.seconds} s</div>
               </div>
@@ -199,7 +222,7 @@ export function HowItWorks({ before, after }: { before: number; after: number })
     <g key="d"><path d="M16 46L44 36L72 28L104 14" stroke="var(--primary)" strokeWidth="2.5" fill="none" /><circle cx="104" cy="14" r="5" fill="var(--primary)" /><path d="M16 50H104" stroke={g} strokeDasharray="3 4" /></g>,
   ];
   return (
-    <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 lg:py-28">
+    <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20 lg:py-28">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16">
         <div>
           <h2 className="text-3xl font-semibold leading-tight sm:text-4xl">How it works</h2>
